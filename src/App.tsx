@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
-import ExpenseForm from "./components/ExpenseForm";
-import ExpenseList from "./components/ExpenseList";
-import FixedExpenseForm from "./components/FixedExpenseForm";
-import FixedExpenseList from "./components/FixedExpenseList";
-import CardManager from "./components/CardManager";
-import { I18nProvider, useLocale, type Locale } from "./i18n";
+import Layout from "./components/Layout";
+import DashboardPage from "./pages/DashboardPage";
+import ExpensesPage from "./pages/ExpensesPage";
+import InstallmentsPage from "./pages/InstallmentsPage";
+import CardsPage from "./pages/CardsPage";
+import { I18nProvider, useLocale } from "./i18n";
 import {
   getInstallmentDate,
   validateExpenseData,
@@ -13,10 +13,9 @@ import {
 } from "./types";
 import type { Card, Expense, FixedExpense, ExpenseData, FixedExpenseData } from "./types";
 
-type Tab = "expenses" | "installments";
+type Page = "dashboard" | "expenses" | "installments" | "cards";
 
 function AppContent() {
-  const { t, locale, setLocale } = useLocale();
   const [expenses, setExpenses] = useState<Expense[]>(() => {
     try {
       const saved = localStorage.getItem("expenses");
@@ -50,7 +49,7 @@ function AppContent() {
       return [];
     }
   });
-  const [tab, setTab] = useState<Tab>("expenses");
+  const [page, setPage] = useState<Page>("dashboard");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [filterCategory, setFilterCategory] = useState("All");
   const [undo, setUndo] = useState<Expense | null>(null);
@@ -100,8 +99,8 @@ function AppContent() {
     return () => clearTimeout(timer);
   }, [undo]);
 
-  const addCard = useCallback((name: string, last4: string) => {
-    const card: Card = { id: crypto.randomUUID(), name, last4 };
+  const addCard = useCallback((name: string, last4: string, type: string) => {
+    const card: Card = { id: crypto.randomUUID(), name, last4, type: type as Card["type"] };
     setCards((prev) => [...prev, card]);
   }, []);
 
@@ -193,89 +192,44 @@ function AppContent() {
     );
   }, []);
 
-  const editingExpense = editingId ? expenses.find((e) => e.id === editingId) : undefined;
+  const navigate = useCallback((p: Page) => {
+    setPage(p);
+    setEditingId(null);
+  }, []);
 
-  const editingFixedExpense = editingId ? fixedExpenses.find((e) => e.id === editingId) : undefined;
-
-  const filteredExpenses =
-    filterCategory === "All" ? expenses : expenses.filter((e) => e.category === filterCategory);
+  const { t } = useLocale();
 
   return (
-    <div className="max-w-xl mx-auto mt-10 p-5">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">{t.appTitle}</h1>
-        <select
-          value={locale}
-          onChange={(e) => setLocale(e.target.value as Locale)}
-          className="px-2.5 py-1.5 pr-8 border border-gray-300 rounded text-sm bg-white cursor-pointer"
-        >
-          <option value="pt-BR">🇧🇷 Português</option>
-          <option value="en">🇺🇸 English</option>
-        </select>
-      </div>
-
-      <div className="flex gap-1 mb-5 bg-gray-100 p-1 rounded-lg">
-        <button
-          onClick={() => {
-            setTab("expenses");
-            setEditingId(null);
-          }}
-          className={`flex-1 py-2 rounded-md text-sm font-medium cursor-pointer transition-colors ${
-            tab === "expenses"
-              ? "bg-white text-indigo-600 shadow-sm"
-              : "text-gray-500 hover:text-gray-700"
-          }`}
-        >
-          {t.expensesTab}
-        </button>
-        <button
-          onClick={() => {
-            setTab("installments");
-            setEditingId(null);
-          }}
-          className={`flex-1 py-2 rounded-md text-sm font-medium cursor-pointer transition-colors ${
-            tab === "installments"
-              ? "bg-white text-indigo-600 shadow-sm"
-              : "text-gray-500 hover:text-gray-700"
-          }`}
-        >
-          {t.installmentsTab}
-        </button>
-      </div>
-
-      {tab === "expenses" ? (
-        <>
-          <ExpenseForm
-            onSubmit={editingId ? updateExpense : addExpense}
-            editingExpense={editingExpense}
-            onCancelEdit={() => setEditingId(null)}
-          />
-          <ExpenseList
-            expenses={filteredExpenses}
-            allExpenses={expenses}
-            onDeleteExpense={deleteExpense}
-            onStartEdit={setEditingId}
-            filterCategory={filterCategory}
-            onFilterChange={setFilterCategory}
-          />
-        </>
+    <Layout page={page} onNavigate={navigate}>
+      {page === "dashboard" ? (
+        <DashboardPage expenses={expenses} fixedExpenses={fixedExpenses} cards={cards} />
+      ) : page === "expenses" ? (
+        <ExpensesPage
+          expenses={expenses}
+          cards={cards}
+          filterCategory={filterCategory}
+          onFilterChange={setFilterCategory}
+          onAddExpense={addExpense}
+          onUpdateExpense={updateExpense}
+          onDeleteExpense={deleteExpense}
+          editingId={editingId}
+          onStartEdit={setEditingId}
+          onCancelEdit={() => setEditingId(null)}
+        />
+      ) : page === "installments" ? (
+        <InstallmentsPage
+          fixedExpenses={fixedExpenses}
+          cards={cards}
+          editingId={editingId}
+          onStartEdit={setEditingId}
+          onCancelEdit={() => setEditingId(null)}
+          onAddFixedExpense={addFixedExpense}
+          onUpdateFixedExpense={updateFixedExpense}
+          onDeleteFixedExpense={deleteFixedExpense}
+          onPayInstallment={payInstallment}
+        />
       ) : (
-        <>
-          <CardManager cards={cards} onAddCard={addCard} onRemoveCard={removeCard} />
-          <FixedExpenseForm
-            onSubmit={editingId ? updateFixedExpense : addFixedExpense}
-            editingFixedExpense={editingFixedExpense}
-            onCancelEdit={() => setEditingId(null)}
-            cards={cards}
-          />
-          <FixedExpenseList
-            fixedExpenses={fixedExpenses}
-            cards={cards}
-            onDeleteFixedExpense={deleteFixedExpense}
-            onStartEdit={setEditingId}
-            onPayInstallment={payInstallment}
-          />
-        </>
+        <CardsPage cards={cards} onAddCard={addCard} onRemoveCard={removeCard} />
       )}
 
       {undo && (
@@ -289,7 +243,7 @@ function AppContent() {
           </button>
         </div>
       )}
-    </div>
+    </Layout>
   );
 }
 
