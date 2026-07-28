@@ -53,6 +53,18 @@ describe("validateExpenseData", () => {
     };
     expect(validateExpenseData(data)).toBe(false);
   });
+
+  it("accepts optional time", () => {
+    const expense = {
+      id: "123",
+      description: "Test",
+      amount: 100,
+      category: "Food",
+      date: "2026-01-01",
+      time: "14:30",
+    };
+    expect(validateExpenseData(expense)).toBe(true);
+  });
 });
 
 describe("validateFixedExpenseData", () => {
@@ -116,5 +128,10 @@ describe("validateCardData", () => {
   it("rejects missing last4", () => {
     const data = { id: "1", name: "Nubank" };
     expect(validateCardData(data)).toBe(false);
+  });
+
+  it("accepts optional type", () => {
+    const card = { id: "1", name: "Nubank", last4: "1234", type: "multiple" };
+    expect(validateCardData(card)).toBe(true);
   });
 });
