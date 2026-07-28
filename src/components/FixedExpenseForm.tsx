@@ -38,6 +38,16 @@ export default function FixedExpenseForm({
     }
   }, [editingFixedExpense]);
 
+  const resetForm = () => {
+    setDescription("");
+    setInstallmentAmount("");
+    setTotalInstallments("1");
+    setPaidInstallments("0");
+    setCategory(CATEGORIES[0]);
+    setStartDate(new Date().toISOString().split("T")[0]);
+    setCardId("");
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const installment = parseFloat(installmentAmount);
@@ -52,15 +62,7 @@ export default function FixedExpenseForm({
       startDate,
       cardId: cardId || undefined,
     });
-    if (!editingFixedExpense) {
-      setDescription("");
-      setInstallmentAmount("");
-      setTotalInstallments("1");
-      setPaidInstallments("0");
-      setCategory(CATEGORIES[0]);
-      setStartDate(new Date().toISOString().split("T")[0]);
-      setCardId("");
-    }
+    resetForm();
   };
 
   const isEditing = !!editingFixedExpense;
@@ -167,15 +169,18 @@ export default function FixedExpenseForm({
       <div className="flex gap-2">
         <button
           type="submit"
-          className="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded text-base cursor-pointer font-medium"
+          className="flex-1 py-3 md:py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded text-base cursor-pointer font-medium min-h-[44px]"
         >
           {isEditing ? t.update : t.addInstallment}
         </button>
         {isEditing && (
           <button
             type="button"
-            onClick={onCancelEdit}
-            className="flex-1 py-2.5 bg-gray-400 hover:bg-gray-500 text-white rounded text-base cursor-pointer font-medium"
+            onClick={() => {
+              resetForm();
+              onCancelEdit();
+            }}
+            className="flex-1 py-3 md:py-2.5 bg-gray-400 hover:bg-gray-500 text-white rounded text-base cursor-pointer font-medium min-h-[44px]"
           >
             {t.cancel}
           </button>
