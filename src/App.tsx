@@ -1,9 +1,11 @@
+"use client";
+
 import { useCallback, useEffect, useState } from "react";
 import Layout from "./components/Layout";
-import DashboardPage from "./pages/DashboardPage";
-import ExpensesPage from "./pages/ExpensesPage";
-import InstallmentsPage from "./pages/InstallmentsPage";
-import CardsPage from "./pages/CardsPage";
+import DashboardPage from "./screens/DashboardPage";
+import ExpensesPage from "./screens/ExpensesPage";
+import InstallmentsPage from "./screens/InstallmentsPage";
+import CardsPage from "./screens/CardsPage";
 import { Button } from "./components/ui";
 import { I18nProvider, useLocale } from "./i18n";
 import {
