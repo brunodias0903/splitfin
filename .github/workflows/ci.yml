@@ -71,6 +71,41 @@ jobs:
       - run: pnpm quality
       - run: pnpm build
 
+  database:
+    name: Database integration
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: splitfin_test
+          POSTGRES_USER: splitfin
+          POSTGRES_PASSWORD: splitfin
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U splitfin -d splitfin_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://splitfin:splitfin@localhost:5432/splitfin_test
+      TEST_DATABASE_URL: postgresql://splitfin:splitfin@localhost:5432/splitfin_test
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm db:migrate
+      - run: pnpm test:db
+
   e2e:
     name: E2E (${{ matrix.project }})
     runs-on: ubuntu-latest

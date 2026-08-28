@@ -21,11 +21,11 @@ reversíveis.
 
 ## M3 — PostgreSQL
 
-- [ ] Definir schema e ferramenta de migrations.
-- [ ] Modelar usuário, conta, cartão, despesa, parcela e categoria.
-- [ ] Usar decimal ou centavos inteiros para valores persistidos.
-- [ ] Adicionar seed e banco isolado para testes.
-- [ ] Implementar backup, restauração e migrations retrocompatíveis.
+- [x] Definir schema e ferramenta de migrations.
+- [x] Modelar usuário, conta, cartão, despesa, parcela e categoria.
+- [x] Usar decimal ou centavos inteiros para valores persistidos.
+- [x] Adicionar seed e banco isolado para testes.
+- [x] Implementar backup, restauração e migrations retrocompatíveis.
 
 ## M4 — Identidade e autorização
 
