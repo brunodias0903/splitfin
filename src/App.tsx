@@ -4,6 +4,7 @@ import DashboardPage from "./pages/DashboardPage";
 import ExpensesPage from "./pages/ExpensesPage";
 import InstallmentsPage from "./pages/InstallmentsPage";
 import CardsPage from "./pages/CardsPage";
+import { Button } from "./components/ui";
 import { I18nProvider, useLocale } from "./i18n";
 import {
   getInstallmentDate,
@@ -233,14 +234,11 @@ function AppContent() {
       )}
 
       {undo && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-gray-800 text-white px-5 py-3 rounded-lg flex items-center gap-4 shadow-lg z-50 animate-slide-up">
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-strong text-on-brand px-5 py-3 rounded-lg flex items-center gap-4 shadow-lg z-50 animate-slide-up">
           <span>{t.expenseDeleted}</span>
-          <button
-            onClick={undoDelete}
-            className="bg-indigo-600 hover:bg-indigo-500 text-white px-3.5 py-1.5 rounded text-sm font-medium cursor-pointer"
-          >
+          <Button onClick={undoDelete} size="sm">
             {t.undo}
-          </button>
+          </Button>
         </div>
       )}
     </Layout>

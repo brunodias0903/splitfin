@@ -1,0 +1,28 @@
+:root {
+  --shadow-sm: 0 1px 2px color-mix(in srgb, var(--shadow-color) 4%, transparent);
+  --shadow-md:
+    0 1px 2px color-mix(in srgb, var(--shadow-color) 3%, transparent),
+    0 8px 30px color-mix(in srgb, var(--shadow-color) 4%, transparent);
+  --shadow-lg: 0 15px 35px color-mix(in srgb, var(--shadow-color) 14%, transparent);
+  --shadow-primary: 0 7px 16px color-mix(in srgb, var(--primary) 18%, transparent);
+  --elevation-primary-lg: 0 15px 35px color-mix(in srgb, var(--primary) 22%, transparent);
+  --elevation-sidebar-logo: 0 10px 15px
+    color-mix(in srgb, var(--shadow-strong-color) 40%, transparent);
+  --elevation-mobile-nav: 0 -8px 30px color-mix(in srgb, var(--shadow-color) 6%, transparent);
+  --elevation-list-item: 0 4px 14px color-mix(in srgb, var(--shadow-color) 3.5%, transparent);
+  --elevation-list-item-hover: 0 8px 22px color-mix(in srgb, var(--shadow-color) 7%, transparent);
+  --elevation-payment-card: 0 15px 35px color-mix(in srgb, var(--shadow-color) 18%, transparent);
+  --elevation-active-nav: 0 10px 15px
+    color-mix(in srgb, var(--shadow-strong-color) 10%, transparent);
+  --focus-ring: 0 0 0 4px color-mix(in srgb, var(--primary-highlight) 14%, transparent);
+}
+
+@theme inline {
+  --shadow-primary-lg: var(--elevation-primary-lg);
+  --shadow-sidebar-logo: var(--elevation-sidebar-logo);
+  --shadow-mobile-nav: var(--elevation-mobile-nav);
+  --shadow-list-item: var(--elevation-list-item);
+  --shadow-list-item-hover: var(--elevation-list-item-hover);
+  --shadow-payment-card: var(--elevation-payment-card);
+  --shadow-active-nav: var(--elevation-active-nav);
+}

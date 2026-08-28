@@ -2,6 +2,7 @@ import type { Card, Expense, ExpenseData } from "../types";
 import ExpenseForm from "../components/ExpenseForm";
 import ExpenseList from "../components/ExpenseList";
 import { useLocale } from "../i18n";
+import { Heading, Text } from "../components/ui";
 
 interface ExpensesPageProps {
   expenses: Expense[];
@@ -34,27 +35,37 @@ export default function ExpensesPage({
     filterCategory === "All" ? expenses : expenses.filter((e) => e.category === filterCategory);
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="ds-page">
       <div>
-        <h1 className="text-2xl font-bold text-gray-800">{t.expensesTab}</h1>
+        <Text variant="eyebrow" tone="muted" className="mb-2">
+          {t.movements}
+        </Text>
+        <Heading level={1} variant="page">
+          {t.expensesTab}
+        </Heading>
+        <Text variant="small" tone="muted" className="mt-1.5">
+          {t.expensesSubtitle}
+        </Text>
       </div>
 
-      <ExpenseForm
-        onSubmit={editingId ? onUpdateExpense : onAddExpense}
-        editingExpense={editingExpense}
-        onCancelEdit={onCancelEdit}
-        cards={cards}
-      />
+      <div className="ds-content-grid">
+        <ExpenseForm
+          onSubmit={editingId ? onUpdateExpense : onAddExpense}
+          editingExpense={editingExpense}
+          onCancelEdit={onCancelEdit}
+          cards={cards}
+        />
 
-      <ExpenseList
-        expenses={filteredExpenses}
-        allExpenses={expenses}
-        onDeleteExpense={onDeleteExpense}
-        onStartEdit={onStartEdit}
-        filterCategory={filterCategory}
-        onFilterChange={onFilterChange}
-        cards={cards}
-      />
+        <ExpenseList
+          expenses={filteredExpenses}
+          allExpenses={expenses}
+          onDeleteExpense={onDeleteExpense}
+          onStartEdit={onStartEdit}
+          filterCategory={filterCategory}
+          onFilterChange={onFilterChange}
+          cards={cards}
+        />
+      </div>
     </div>
   );
 }

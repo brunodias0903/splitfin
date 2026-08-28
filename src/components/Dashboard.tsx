@@ -3,8 +3,17 @@ import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 import type { Card, Expense, FixedExpense } from "../types";
 import { CATEGORIES, getInstallmentDate } from "../types";
 import { useLocale } from "../i18n";
+import { Icon } from "./Icons";
+import { Heading, NativeSelect, Surface, Text } from "./ui";
 
-const COLORS = ["#6366f1", "#f59e0b", "#10b981", "#ef4444", "#8b5cf6", "#06b6d4"];
+const CHART_COLORS = [
+  "var(--data-1)",
+  "var(--data-2)",
+  "var(--data-3)",
+  "var(--data-4)",
+  "var(--data-5)",
+  "var(--data-6)",
+];
 
 interface DashboardProps {
   expenses: Expense[];
@@ -114,13 +123,17 @@ export default function Dashboard({ expenses, fixedExpenses, cards }: DashboardP
   }, [fixedExpenses, currentYM]);
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-6">
       {/* Month selector */}
-      <div className="flex items-center gap-3">
-        <select
+      <div className="flex items-center justify-between gap-3">
+        <Text variant="small" tone="muted" className="hidden font-semibold sm:block">
+          {t.analysisPeriod}
+        </Text>
+        <NativeSelect
           value={selectedMonth}
           onChange={(e) => setSelectedMonth(e.target.value)}
-          className="px-3 py-2 pr-10 border border-gray-300 rounded text-sm bg-white"
+          aria-label={t.analysisPeriod}
+          className="max-w-[210px] font-semibold capitalize"
         >
           {monthOptions.map((ym) => (
             <option key={ym} value={ym}>
@@ -130,46 +143,70 @@ export default function Dashboard({ expenses, fixedExpenses, cards }: DashboardP
               })}
             </option>
           ))}
-        </select>
+        </NativeSelect>
       </div>
 
       {/* Summary cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-          <span className="text-xs text-gray-500 font-medium uppercase tracking-wide">
-            {t.thisMonth}
-          </span>
-          <p className="text-2xl font-bold text-gray-800 mt-1">{formatCurrency(thisMonthTotal)}</p>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <Surface className="relative overflow-hidden p-5 sm:p-6">
+          <div className="absolute -right-5 -top-5 h-24 w-24 rounded-full bg-primary-soft" />
+          <div className="relative flex items-start justify-between">
+            <span className="eyebrow">{t.thisMonth}</span>
+            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary-soft text-primary">
+              <Icon name="wallet" size={18} />
+            </span>
+          </div>
+          <p className="relative mt-4 text-2xl font-bold tracking-tight text-strong sm:text-[1.7rem]">
+            {formatCurrency(thisMonthTotal)}
+          </p>
           <span
-            className={`text-xs font-medium ${percentChange >= 0 ? "text-red-500" : "text-emerald-500"}`}
+            className={`mt-2 inline-flex rounded-full px-2 py-1 text-[11px] font-bold ${percentChange >= 0 ? "bg-danger-soft text-danger-strong" : "bg-success-soft text-success"}`}
           >
             {percentChange >= 0 ? "+" : ""}
             {percentChange.toFixed(1)}% {t.vsLastMonth}
           </span>
-        </div>
-        <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-          <span className="text-xs text-gray-500 font-medium uppercase tracking-wide">
-            {t.lastMonth}
+        </Surface>
+        <Surface className="p-5 sm:p-6">
+          <div className="flex items-start justify-between">
+            <span className="eyebrow">{t.lastMonth}</span>
+            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-warning-soft text-warning">
+              <Icon name="calendar" size={18} />
+            </span>
+          </div>
+          <p className="mt-4 text-2xl font-bold tracking-tight text-strong sm:text-[1.7rem]">
+            {formatCurrency(lastMonthTotal)}
+          </p>
+          <span className="mt-2 block text-xs font-medium text-muted-foreground">
+            {t.consolidatedHistory}
           </span>
-          <p className="text-2xl font-bold text-gray-800 mt-1">{formatCurrency(lastMonthTotal)}</p>
-        </div>
-        <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-          <span className="text-xs text-gray-500 font-medium uppercase tracking-wide">
-            {t.forecast}
-          </span>
-          <p className="text-2xl font-bold text-indigo-600 mt-1">
+        </Surface>
+        <div className="relative overflow-hidden rounded-2xl bg-primary p-5 text-on-brand shadow-primary-lg sm:p-6">
+          <div className="absolute -bottom-12 -right-8 h-32 w-32 rounded-full border-[22px] border-on-brand/8" />
+          <div className="relative flex items-start justify-between">
+            <span className="text-[11px] font-bold uppercase tracking-[0.1em] text-on-brand/90">
+              {t.forecast}
+            </span>
+            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-surface/12 text-on-brand">
+              <Icon name="trend" size={18} />
+            </span>
+          </div>
+          <p className="relative mt-4 text-2xl font-bold tracking-tight sm:text-[1.7rem]">
             {formatCurrency(cardForecast.reduce((s, c) => s + c.total, 0))}
           </p>
-          <span className="text-xs text-gray-400">{t.byCard}</span>
+          <span className="relative mt-2 block text-xs font-medium text-on-brand/90">
+            {t.byCard}
+          </span>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
         {/* Donut chart */}
-        <div className="bg-white p-5 rounded-lg shadow-sm border border-gray-200">
-          <h3 className="text-sm font-semibold text-gray-700 mb-3">{t.byCategory}</h3>
+        <Surface className="p-5 sm:p-6">
+          <Heading level={3} variant="section" className="mb-3">
+            {t.byCategory}
+          </Heading>
           {categoryData.length === 0 ? (
-            <p className="text-gray-400 text-center py-8 text-sm">{t.noData}</p>
+            <p className="py-12 text-center text-sm text-muted-foreground">{t.noData}</p>
           ) : (
             <div className="flex flex-col items-center">
               <ResponsiveContainer width="100%" height={200}>
@@ -178,78 +215,100 @@ export default function Dashboard({ expenses, fixedExpenses, cards }: DashboardP
                     data={categoryData}
                     cx="50%"
                     cy="50%"
-                    innerRadius={50}
-                    outerRadius={80}
+                    innerRadius={56}
+                    outerRadius={82}
+                    paddingAngle={3}
                     dataKey="value"
                     stroke="none"
                   >
                     {categoryData.map((_, i) => (
-                      <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                      <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
                     ))}
                   </Pie>
                   <Tooltip formatter={(value) => formatCurrency(Number(value))} />
                 </PieChart>
               </ResponsiveContainer>
-              <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 mt-2">
+              <div className="mt-3 flex flex-wrap justify-center gap-x-4 gap-y-2">
                 {categoryData.map((d, i) => (
-                  <div key={d.name} className="flex items-center gap-1.5 text-xs text-gray-600">
+                  <div
+                    key={d.name}
+                    className="flex items-center gap-1.5 text-xs text-muted-foreground"
+                  >
                     <span
                       className="w-2.5 h-2.5 rounded-full"
-                      style={{ backgroundColor: COLORS[i % COLORS.length] }}
+                      style={{ backgroundColor: CHART_COLORS[i % CHART_COLORS.length] }}
                     />
                     <span>{d.name}</span>
-                    <span className="font-medium">{formatCurrency(d.value)}</span>
+                    <span className="font-bold text-foreground">{formatCurrency(d.value)}</span>
                   </div>
                 ))}
               </div>
             </div>
           )}
-        </div>
+        </Surface>
 
         {/* Card forecast */}
-        <div className="bg-white p-5 rounded-lg shadow-sm border border-gray-200">
-          <h3 className="text-sm font-semibold text-gray-700 mb-3">{t.byCard}</h3>
+        <Surface className="p-5 sm:p-6">
+          <Heading level={3} variant="section" className="mb-5">
+            {t.byCard}
+          </Heading>
           {cardForecast.length === 0 ? (
-            <p className="text-gray-400 text-center py-8 text-sm">{t.noData}</p>
+            <p className="py-12 text-center text-sm text-muted-foreground">{t.noData}</p>
           ) : (
-            <div className="flex flex-col gap-3">
-              {cardForecast.map((item) => (
-                <div key={item.cardName} className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">{item.cardName}</span>
-                  <span className="text-sm font-semibold text-gray-800">
+            <div className="flex flex-col gap-2.5">
+              {cardForecast.map((item, index) => (
+                <div
+                  key={item.cardName}
+                  className="flex items-center justify-between rounded-xl bg-surface-subtle px-4 py-3.5"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-surface text-xs font-bold text-primary shadow-sm">
+                      {index + 1}
+                    </span>
+                    <span className="text-sm font-semibold text-muted-foreground">
+                      {item.cardName}
+                    </span>
+                  </div>
+                  <span className="text-sm font-bold text-strong">
                     {formatCurrency(item.total)}
                   </span>
                 </div>
               ))}
             </div>
           )}
-        </div>
+        </Surface>
       </div>
 
       {/* Upcoming installments */}
-      <div className="bg-white p-5 rounded-lg shadow-sm border border-gray-200">
-        <h3 className="text-sm font-semibold text-gray-700 mb-3">{t.nextInstallments}</h3>
+      <Surface className="overflow-hidden">
+        <div className="border-b border-border-subtle px-5 py-4 sm:px-6">
+          <Heading level={3} variant="section">
+            {t.nextInstallments}
+          </Heading>
+        </div>
         {upcomingPayments.length === 0 ? (
-          <p className="text-gray-400 text-center py-5 text-sm">{t.noUpcoming}</p>
+          <p className="py-10 text-center text-sm text-muted-foreground">{t.noUpcoming}</p>
         ) : (
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col px-5 py-1 sm:px-6">
             {upcomingPayments.map((expense) => {
               const card = cards.find((c) => c.id === expense.cardId);
               return (
                 <div
                   key={expense.id}
-                  className="flex justify-between items-center py-1.5 border-b border-gray-50 last:border-b-0"
+                  className="flex items-center justify-between gap-4 border-b border-border-subtle py-4 last:border-b-0"
                 >
                   <div className="flex flex-col">
-                    <span className="text-sm text-gray-800">{expense.description}</span>
-                    <span className="text-xs text-gray-400">
+                    <span className="text-sm font-semibold text-foreground">
+                      {expense.description}
+                    </span>
+                    <span className="mt-0.5 text-xs text-subtle-foreground">
                       {expense.paidInstallments + 1}/{expense.totalInstallments}
                       {card && ` — ${card.name}`}
                       {" — "}
                       {formatDate(expense.nextDate)}
                     </span>
                   </div>
-                  <span className="text-sm font-semibold text-indigo-600">
+                  <span className="whitespace-nowrap text-sm font-bold text-primary">
                     {formatCurrency(expense.installmentAmount)}
                   </span>
                 </div>
@@ -257,7 +316,7 @@ export default function Dashboard({ expenses, fixedExpenses, cards }: DashboardP
             })}
           </div>
         )}
-      </div>
+      </Surface>
     </div>
   );
 }

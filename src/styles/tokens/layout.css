@@ -1,0 +1,8 @@
+:root {
+  --sidebar-width: 16.75rem;
+  --content-max-width: 73.75rem;
+  --page-padding-mobile: 1rem;
+  --page-padding-tablet: 2rem;
+  --page-padding-desktop: 2.5rem;
+  --control-height: 2.875rem;
+}

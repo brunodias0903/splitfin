@@ -1,0 +1,13 @@
+:root {
+  --font-family: "Poppins", ui-sans-serif, system-ui, sans-serif;
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-md: 1rem;
+  --font-size-lg: 1.125rem;
+  --line-height-body: 1.55;
+}
+
+@theme inline {
+  --font-heading: var(--font-family);
+  --font-sans: var(--font-family);
+}

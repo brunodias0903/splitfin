@@ -2,6 +2,7 @@ import type { Card, FixedExpense, FixedExpenseData } from "../types";
 import FixedExpenseForm from "../components/FixedExpenseForm";
 import FixedExpenseList from "../components/FixedExpenseList";
 import { useLocale } from "../i18n";
+import { Heading, Text } from "../components/ui";
 
 interface InstallmentsPageProps {
   fixedExpenses: FixedExpense[];
@@ -30,23 +31,33 @@ export default function InstallmentsPage({
   const editingFixedExpense = editingId ? fixedExpenses.find((e) => e.id === editingId) : undefined;
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="ds-page">
       <div>
-        <h1 className="text-2xl font-bold text-gray-800">{t.installmentsTab}</h1>
+        <Text variant="eyebrow" tone="muted" className="mb-2">
+          {t.planning}
+        </Text>
+        <Heading level={1} variant="page">
+          {t.installmentsTab}
+        </Heading>
+        <Text variant="small" tone="muted" className="mt-1.5">
+          {t.installmentsSubtitle}
+        </Text>
       </div>
-      <FixedExpenseForm
-        onSubmit={editingId ? onUpdateFixedExpense : onAddFixedExpense}
-        editingFixedExpense={editingFixedExpense}
-        onCancelEdit={onCancelEdit}
-        cards={cards}
-      />
-      <FixedExpenseList
-        fixedExpenses={fixedExpenses}
-        cards={cards}
-        onDeleteFixedExpense={onDeleteFixedExpense}
-        onStartEdit={onStartEdit}
-        onPayInstallment={onPayInstallment}
-      />
+      <div className="ds-content-grid">
+        <FixedExpenseForm
+          onSubmit={editingId ? onUpdateFixedExpense : onAddFixedExpense}
+          editingFixedExpense={editingFixedExpense}
+          onCancelEdit={onCancelEdit}
+          cards={cards}
+        />
+        <FixedExpenseList
+          fixedExpenses={fixedExpenses}
+          cards={cards}
+          onDeleteFixedExpense={onDeleteFixedExpense}
+          onStartEdit={onStartEdit}
+          onPayInstallment={onPayInstallment}
+        />
+      </div>
     </div>
   );
 }

@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import type { Card, Expense, FixedExpense } from "../types";
 import Dashboard from "../components/Dashboard";
 import { useLocale } from "../i18n";
+import { Heading, Surface, Text } from "../components/ui";
 
 interface DashboardPageProps {
   expenses: Expense[];
@@ -21,37 +22,60 @@ export default function DashboardPage({ expenses, fixedExpenses, cards }: Dashbo
   }, [expenses]);
 
   return (
-    <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-800">{t.greeting}</h1>
-        <p className="text-sm text-gray-500 mt-0.5">{t.subtitle}</p>
+    <div className="ds-page">
+      <div className="flex items-end justify-between gap-4">
+        <div>
+          <Text variant="eyebrow" tone="muted" className="mb-2">
+            {t.overview}
+          </Text>
+          <Heading level={1} variant="page">
+            {t.greeting}
+          </Heading>
+          <Text variant="small" tone="muted" className="mt-1.5">
+            {t.subtitle}
+          </Text>
+        </div>
+        <div className="hidden rounded-full border border-border bg-surface px-3.5 py-2 text-xs font-semibold text-muted-foreground shadow-sm sm:block">
+          {new Date().toLocaleDateString(undefined, {
+            weekday: "long",
+            day: "2-digit",
+            month: "short",
+          })}
+        </div>
       </div>
 
       <Dashboard expenses={expenses} fixedExpenses={fixedExpenses} cards={cards} />
 
       {recentExpenses.length > 0 && (
-        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-200">
-          <h3 className="text-sm font-semibold text-gray-700 mb-3">{t.recentExpenses}</h3>
-          <div className="flex flex-col gap-1.5">
+        <Surface className="overflow-hidden">
+          <div className="ds-card-header">
+            <Heading level={3} variant="section">
+              {t.recentExpenses}
+            </Heading>
+            <span className="text-xs font-semibold text-subtle-foreground">
+              {recentExpenses.length} {t.items}
+            </span>
+          </div>
+          <div className="flex flex-col px-5 py-2 sm:px-6">
             {recentExpenses.map((e) => (
               <div
                 key={e.id}
-                className="flex justify-between items-center py-1.5 border-b border-gray-50 last:border-b-0"
+                className="flex items-center justify-between gap-4 border-b border-border-subtle py-3.5 last:border-b-0"
               >
                 <div className="flex flex-col">
-                  <span className="text-sm text-gray-800">{e.description}</span>
-                  <span className="text-xs text-gray-400">
+                  <span className="text-sm font-semibold text-foreground">{e.description}</span>
+                  <span className="mt-0.5 text-xs text-subtle-foreground">
                     {formatDate(e.date)}
                     {e.time && ` ${e.time.slice(0, 5)}`}
                   </span>
                 </div>
-                <span className="text-sm font-semibold text-gray-800">
+                <span className="whitespace-nowrap text-sm font-bold text-strong">
                   {formatCurrency(e.amount)}
                 </span>
               </div>
             ))}
           </div>
-        </div>
+        </Surface>
       )}
     </div>
   );

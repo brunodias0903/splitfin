@@ -1,6 +1,7 @@
 import type { Card } from "../types";
 import CardManager from "../components/CardManager";
 import { useLocale } from "../i18n";
+import { Heading, Surface, Text } from "../components/ui";
 
 interface CardsPageProps {
   cards: Card[];
@@ -12,15 +13,22 @@ export default function CardsPage({ cards, onAddCard, onRemoveCard }: CardsPageP
   const { t } = useLocale();
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="ds-page">
       <div>
-        <h1 className="text-2xl font-bold text-gray-800">{t.cards}</h1>
-        <p className="text-sm text-gray-500 mt-0.5">Gerencie seus cartões de crédito e débito</p>
+        <Text variant="eyebrow" tone="muted" className="mb-2">
+          {t.wallet}
+        </Text>
+        <Heading level={1} variant="page">
+          {t.cards}
+        </Heading>
+        <Text variant="small" tone="muted" className="mt-1.5">
+          {t.cardsSubtitle}
+        </Text>
       </div>
 
-      <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-200">
+      <Surface className="ds-section-padding">
         <CardManager cards={cards} onAddCard={onAddCard} onRemoveCard={onRemoveCard} />
-      </div>
+      </Surface>
     </div>
   );
 }
