@@ -3,6 +3,10 @@
 O roadmap é organizado em marcos que devem gerar pull requests independentes e
 reversíveis.
 
+Os próximos passos detalhados, dependências, critérios de aceite e instruções
+para alternar entre macOS e WSL estão no
+[guia de continuidade](development-handoff.md).
+
 ## M1 — Fundação Next.js
 
 - [x] Substituir o shell Vite por Next.js App Router.

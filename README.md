@@ -89,6 +89,7 @@ validation, risk, rollback, and visual evidence.
 
 - [Architecture decisions](docs/architecture/README.md)
 - [Technical roadmap](docs/roadmap.md)
+- [Cross-machine development handoff (Portuguese)](docs/development-handoff.md)
 
 ---
 

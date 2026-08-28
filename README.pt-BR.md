@@ -89,6 +89,7 @@ validação, risco, rollback e evidências visuais.
 
 - [Decisões arquiteturais](docs/architecture/README.md)
 - [Roadmap técnico](docs/roadmap.md)
+- [Guia de continuidade entre máquinas](docs/development-handoff.md)
 
 ---
 
