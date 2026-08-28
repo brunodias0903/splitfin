@@ -47,6 +47,7 @@
 | Framework   | Next.js 16 + React 19            |
 | Runtime     | Node.js 22                        |
 | Linguagem   | TypeScript 6 (strict mode)       |
+| Banco       | PostgreSQL 17 + Drizzle ORM      |
 | Estilização | Tailwind CSS 4                   |
 | Testes      | Vitest + Playwright              |
 | Entrega     | Docker (standalone output)       |
@@ -66,6 +67,9 @@ pnpm test       # testes
 pnpm test:e2e   # testes de navegador e acessibilidade
 pnpm quality    # typecheck + lint + test
 ```
+
+O fluxo local do banco e a política de migrations estão documentados em
+[docs/database.md](docs/database.md).
 
 ---
 
