@@ -3,7 +3,7 @@ import { extname, join, relative } from "node:path";
 import { describe, expect, it } from "vitest";
 
 const SOURCE_ROOT = join(process.cwd(), "src");
-const COLOR_FILE = join(SOURCE_ROOT, "styles", "tokens", "colors.css");
+const COLOR_FILE = join(SOURCE_ROOT, "shared", "styles", "tokens", "colors.css");
 const SOURCE_EXTENSIONS = new Set([".css", ".ts", ".tsx"]);
 const RAW_COLOR = /#[\da-f]{3,8}\b|\b(?:rgb|hsl|oklch)\(/i;
 const TAILWIND_PALETTE =
