@@ -71,7 +71,9 @@ Before each commit:
 2. `typecheck` — TypeScript strict mode
 3. `test` — Vitest
 
-PRs are auto-populated with title and description from conventional commits.
+Branches, commits, and pull requests follow the rules in
+[CONTRIBUTING.md](CONTRIBUTING.md). Pull requests use a template covering
+validation, risk, rollback, and visual evidence.
 
 ---
 

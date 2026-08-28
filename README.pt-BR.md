@@ -71,7 +71,9 @@ Antes de cada commit:
 2. `typecheck` — TypeScript strict mode
 3. `test` — Vitest
 
-Abertura de PR gera automaticamente título e descrição a partir dos conventional commits.
+Branches, commits e pull requests seguem as regras descritas em
+[CONTRIBUTING.md](CONTRIBUTING.md). Pull requests utilizam um template com
+validação, risco, rollback e evidências visuais.
 
 ---
 

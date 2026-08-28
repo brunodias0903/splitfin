@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Reportar uma vulnerabilidade
+    url: https://github.com/brunodias0903/splitfin/security/advisories/new
+    about: Use um advisory privado; não publique vulnerabilidades em issues.
