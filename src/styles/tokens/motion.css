@@ -1,0 +1,10 @@
+:root {
+  --duration-fast: 120ms;
+  --duration-normal: 180ms;
+  --duration-slow: 300ms;
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+}
+
+@theme inline {
+  --animate-slide-up: slide-up var(--duration-normal) var(--ease-standard);
+}

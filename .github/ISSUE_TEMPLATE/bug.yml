@@ -1,0 +1,50 @@
+name: Relatar um problema
+description: Informe um comportamento incorreto ou uma regressão.
+title: "fix: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: Não inclua credenciais, tokens ou dados financeiros reais.
+  - type: textarea
+    id: description
+    attributes:
+      label: Descrição
+      description: O que aconteceu e qual era o comportamento esperado?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Como reproduzir
+      description: Liste os passos mínimos e determinísticos.
+      placeholder: |
+        1. Acesse...
+        2. Selecione...
+        3. Observe...
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidências
+      description: Inclua mensagens de erro sanitizadas, screenshots ou vídeos.
+  - type: input
+    id: environment
+    attributes:
+      label: Ambiente
+      placeholder: Produção, staging ou local; navegador e versão
+    validations:
+      required: true
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severidade
+      options:
+        - Baixa — há alternativa simples
+        - Média — afeta um fluxo, mas sem perda de dados
+        - Alta — bloqueia fluxo importante ou pode afetar dados
+        - Crítica — segurança, indisponibilidade ou integridade financeira
+    validations:
+      required: true

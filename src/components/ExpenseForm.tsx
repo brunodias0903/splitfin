@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { CATEGORIES, PAYMENT_TYPES, type Card, type Expense, type ExpenseData } from "../types";
 import { useLocale } from "../i18n";
+import { Icon } from "./Icons";
+import { Button, Heading, Input, NativeSelect, Text } from "./ui";
 
 interface ExpenseFormProps {
   onSubmit: (data: ExpenseData) => void;
@@ -66,22 +68,29 @@ export default function ExpenseForm({
   const isEditing = !!editingExpense;
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="bg-white p-5 rounded-lg shadow-sm border border-gray-200 mb-5 flex flex-col gap-3"
-    >
-      <h2 className="text-lg font-semibold text-gray-700">
-        {isEditing ? t.editExpense : t.addExpense}
-      </h2>
-      <input
+    <form onSubmit={handleSubmit} className="surface ds-form-card">
+      <div className="mb-1 flex items-center gap-3">
+        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-soft text-primary">
+          <Icon name={isEditing ? "edit" : "plus"} size={19} />
+        </span>
+        <div>
+          <Text variant="eyebrow" tone="muted">
+            {t.entry}
+          </Text>
+          <Heading level={2} variant="section" className="mt-0.5">
+            {isEditing ? t.editExpense : t.addExpense}
+          </Heading>
+        </div>
+      </div>
+      <Input
         type="text"
         placeholder={t.description}
         value={description}
         onChange={(e) => setDescription(e.target.value)}
         required
-        className="px-3 py-2.5 border border-gray-300 rounded text-base"
+        aria-label={t.description}
       />
-      <input
+      <Input
         type="number"
         placeholder={t.amount}
         step="0.01"
@@ -89,27 +98,29 @@ export default function ExpenseForm({
         value={amount}
         onChange={(e) => setAmount(e.target.value)}
         required
-        className="px-3 py-2.5 border border-gray-300 rounded text-base"
+        aria-label={t.amount}
       />
-      <select
+      <NativeSelect
         value={paymentType}
         onChange={(e) => {
           setPaymentType(e.target.value);
           setCardId("");
         }}
-        className="px-3 py-2.5 pr-10 border border-gray-300 rounded text-base bg-white"
+        aria-label={t.paymentType}
+        className="w-full"
       >
         {PAYMENT_TYPES.map((pt) => (
           <option key={pt} value={pt}>
             {t.paymentTypes[pt]}
           </option>
         ))}
-      </select>
+      </NativeSelect>
       {isCardPayment && (
-        <select
+        <NativeSelect
           value={cardId}
           onChange={(e) => setCardId(e.target.value)}
-          className="px-3 py-2.5 pr-10 border border-gray-300 rounded text-base bg-white"
+          aria-label={t.cards}
+          className="w-full"
         >
           <option value="">{t.noCard}</option>
           {cards
@@ -119,52 +130,51 @@ export default function ExpenseForm({
                 {card.name} ••{card.last4} ({t.cardTypes[card.type]})
               </option>
             ))}
-        </select>
+        </NativeSelect>
       )}
-      <select
+      <NativeSelect
         value={category}
         onChange={(e) => setCategory(e.target.value)}
-        className="px-3 py-2.5 pr-10 border border-gray-300 rounded text-base bg-white"
+        aria-label={t.allCategories}
+        className="w-full"
       >
         {CATEGORIES.map((cat) => (
           <option key={cat} value={cat}>
             {t.categories[cat]}
           </option>
         ))}
-      </select>
+      </NativeSelect>
       <div className="grid grid-cols-2 gap-3">
-        <input
+        <Input
           type="date"
           value={date}
           onChange={(e) => setDate(e.target.value)}
           required
-          className="px-3 py-2.5 border border-gray-300 rounded text-base"
+          aria-label={t.date}
         />
-        <input
+        <Input
           type="time"
           value={time}
           onChange={(e) => setTime(e.target.value)}
-          className="px-3 py-2.5 border border-gray-300 rounded text-base"
+          aria-label="Hora"
         />
       </div>
       <div className="flex gap-2">
-        <button
-          type="submit"
-          className="flex-1 py-3 md:py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded text-base cursor-pointer font-medium min-h-[44px]"
-        >
+        <Button type="submit" className="flex-1">
           {isEditing ? t.update : t.addExpense}
-        </button>
+        </Button>
         {isEditing && (
-          <button
+          <Button
             type="button"
+            variant="secondary"
             onClick={() => {
               resetForm();
               onCancelEdit();
             }}
-            className="flex-1 py-3 md:py-2.5 bg-gray-400 hover:bg-gray-500 text-white rounded text-base cursor-pointer font-medium min-h-[44px]"
+            className="flex-1"
           >
             {t.cancel}
-          </button>
+          </Button>
         )}
       </div>
     </form>

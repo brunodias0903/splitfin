@@ -1,25 +1,32 @@
-## Descrição
+## Objetivo
 
-<!-- Descreva o que foi feito e por que. -->
+<!-- Explique o problema e o resultado esperado. -->
 
-## Tipo de mudança
+## Alterações
 
-- [ ] feat: nova funcionalidade
-- [ ] fix: correção de bug
-- [ ] refactor: refatoração de código
-- [ ] style: formatação/styling (sem mudança de lógica)
-- [ ] test: adição ou alteração de testes
-- [ ] chore: tarefa de manutenção (build, dependências, config)
+<!-- Liste as decisões relevantes, não apenas os arquivos modificados. -->
 
-## Como testar
+## Como validar
 
-<!-- Passos para reproduzir/testar a mudança. -->
+<!-- Informe passos reproduzíveis e comandos executados. -->
 
-## Screenshots (se aplicável)
+- [ ] `pnpm quality`
+- [ ] `pnpm build`
+- [ ] `pnpm test:e2e` quando houver impacto em fluxos ou interface
+
+## Evidências visuais
+
+<!-- Adicione screenshots ou gravações para mudanças de UI. Remova se não se aplicar. -->
+
+## Risco e rollback
+
+<!-- Descreva impacto, compatibilidade, migrations e como reverter. -->
 
 ## Checklist
 
-- [ ] O código segue o style guide do projeto (Prettier + oxlint)
-- [ ] TypeScript compila sem erros (`npm run typecheck`)
-- [ ] Testes passam (`npm run test`)
-- [ ] Testes novos foram adicionados para cobrir a mudança
+- [ ] O PR possui escopo único e título no padrão Conventional Commits.
+- [ ] Foram adicionados ou atualizados testes relevantes.
+- [ ] Não há secrets, dados financeiros reais ou logs sensíveis.
+- [ ] Acessibilidade e responsividade foram verificadas quando aplicável.
+- [ ] Documentação e traduções foram atualizadas quando aplicável.
+- [ ] Mudanças de banco são retrocompatíveis ou possuem plano de rollback.

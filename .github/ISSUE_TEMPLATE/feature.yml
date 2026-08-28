@@ -1,0 +1,34 @@
+name: Sugerir uma melhoria
+description: Proponha uma capacidade ou evolução do produto.
+title: "feat: "
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problema
+      description: Que necessidade do usuário deve ser resolvida?
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Resultado esperado
+      description: Descreva o comportamento desejado sem impor a implementação.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Critérios de aceite
+      placeholder: |
+        - [ ] Dado que..., quando..., então...
+        - [ ] O fluxo funciona em mobile e desktop
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Contexto adicional
+      description: Inclua referências, restrições ou alternativas consideradas.

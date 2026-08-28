@@ -1,4 +1,6 @@
 import { useLocale, type Locale } from "../i18n";
+import { Icon, type IconName } from "./Icons";
+import { NativeSelect } from "./ui";
 
 type Page = "dashboard" | "expenses" | "installments" | "cards";
 
@@ -8,73 +10,127 @@ interface LayoutProps {
   children: React.ReactNode;
 }
 
-const NAV_ITEMS: { page: Page; labelKey: keyof ReturnType<typeof useLocale>["t"]; icon: string }[] =
-  [
-    { page: "dashboard", labelKey: "navDashboard" as never, icon: "📊" },
-    { page: "expenses", labelKey: "navExpenses" as never, icon: "💰" },
-    { page: "installments", labelKey: "navInstallments" as never, icon: "📦" },
-    { page: "cards", labelKey: "navCards" as never, icon: "💳" },
-  ];
+const NAV_ITEMS: { page: Page; labelKey: string; icon: IconName }[] = [
+  { page: "dashboard", labelKey: "navDashboard", icon: "dashboard" },
+  { page: "expenses", labelKey: "navExpenses", icon: "expenses" },
+  { page: "installments", labelKey: "navInstallments", icon: "installments" },
+  { page: "cards", labelKey: "navCards", icon: "cards" },
+];
 
 export default function Layout({ page, onNavigate, children }: LayoutProps) {
   const { t, locale, setLocale } = useLocale();
 
   return (
-    <div className="flex h-screen bg-gray-50">
-      {/* Desktop sidebar */}
-      <aside className="hidden md:flex md:w-60 flex-shrink-0 bg-indigo-950 text-white flex-col">
-        <div className="px-5 pt-6 pb-4">
-          <h1 className="text-lg font-bold tracking-tight">{t.appTitle}</h1>
+    <div className="app-shell flex min-h-screen">
+      <aside className="ds-sidebar sticky top-0 hidden h-screen shrink-0 flex-col overflow-hidden bg-sidebar-surface text-on-brand md:flex">
+        <div className="pointer-events-none absolute -left-24 -top-24 h-72 w-72 rounded-full bg-primary-highlight/15 blur-3xl" />
+        <div className="relative flex items-center gap-3 px-6 pb-9 pt-7">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-highlight text-on-brand shadow-sidebar-logo">
+            <Icon name="wallet" size={21} />
+          </div>
+          <div>
+            <h1 className="text-base font-bold tracking-tight">Splitfin</h1>
+            <p className="text-[11px] font-medium text-on-dark-muted">{t.appTitle}</p>
+          </div>
         </div>
 
-        <nav className="flex-1 px-3 space-y-1">
-          {NAV_ITEMS.map((item) => (
-            <button
-              key={item.page}
-              onClick={() => onNavigate(item.page)}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium cursor-pointer transition-colors ${
-                page === item.page
-                  ? "bg-indigo-800 text-white"
-                  : "text-indigo-200 hover:bg-indigo-900 hover:text-white"
-              }`}
-            >
-              <span className="text-base">{item.icon}</span>
-              <span>{t[item.labelKey] as string}</span>
-            </button>
-          ))}
+        <p className="relative px-7 pb-3 text-[10px] font-bold uppercase tracking-[0.18em] text-on-dark-muted">
+          {t.menu}
+        </p>
+        <nav className="relative flex-1 space-y-1 px-4" aria-label="Principal">
+          {NAV_ITEMS.map((item) => {
+            const active = page === item.page;
+            return (
+              <button
+                key={item.page}
+                onClick={() => onNavigate(item.page)}
+                aria-current={active ? "page" : undefined}
+                className={`group flex w-full cursor-pointer items-center gap-3 rounded-xl px-3.5 py-3 text-sm font-semibold transition-all ${
+                  active
+                    ? "bg-surface text-strong shadow-active-nav"
+                    : "text-on-dark-muted hover:bg-surface/6 hover:text-on-brand"
+                }`}
+              >
+                <span
+                  className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${
+                    active
+                      ? "bg-primary-soft text-primary"
+                      : "text-on-dark-muted group-hover:text-on-brand"
+                  }`}
+                >
+                  <Icon name={item.icon} size={18} />
+                </span>
+                <span>{t[item.labelKey as keyof typeof t] as string}</span>
+                {active && (
+                  <span className="ml-auto h-1.5 w-1.5 rounded-full bg-primary-highlight" />
+                )}
+              </button>
+            );
+          })}
         </nav>
 
-        <div className="px-3 pb-4">
-          <select
+        <div className="relative m-4 rounded-2xl border border-on-brand/8 bg-surface/4 p-3.5">
+          <label className="mb-2 block text-[10px] font-bold uppercase tracking-wider text-on-dark-muted">
+            {t.language}
+          </label>
+          <NativeSelect
             value={locale}
             onChange={(e) => setLocale(e.target.value as Locale)}
-            className="w-full px-2.5 py-2 rounded-lg text-sm bg-indigo-900 text-indigo-200 border border-indigo-700 cursor-pointer"
+            aria-label="Idioma"
+            className="w-full [&_[data-slot=native-select]]:border-on-brand/10 [&_[data-slot=native-select]]:bg-sidebar-surface-accent [&_[data-slot=native-select]]:text-on-brand/85"
+            size="sm"
           >
-            <option value="pt-BR">🇧🇷 Português</option>
-            <option value="en">🇺🇸 English</option>
-          </select>
+            <option value="pt-BR">Português · BR</option>
+            <option value="en">English · US</option>
+          </NativeSelect>
         </div>
       </aside>
 
-      {/* Main content */}
-      <main className="flex-1 overflow-y-auto pb-16 md:pb-0">
-        <div className="max-w-5xl mx-auto px-4 py-4 md:px-6 md:py-6">{children}</div>
+      <main className="min-w-0 flex-1 overflow-y-auto pb-24 md:pb-0">
+        <header className="flex h-16 items-center justify-between border-b border-border/70 bg-surface/70 px-5 backdrop-blur-lg md:hidden">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-on-brand">
+              <Icon name="wallet" size={19} />
+            </div>
+            <span className="font-bold tracking-tight text-strong">Splitfin</span>
+          </div>
+          <NativeSelect
+            value={locale}
+            onChange={(e) => setLocale(e.target.value as Locale)}
+            aria-label="Idioma"
+            className="w-16"
+            size="sm"
+          >
+            <option value="pt-BR">PT</option>
+            <option value="en">EN</option>
+          </NativeSelect>
+        </header>
+        <div className="ds-page-container">{children}</div>
       </main>
 
-      {/* Mobile bottom nav */}
-      <nav className="fixed bottom-0 left-0 right-0 md:hidden bg-white border-t border-gray-200 flex safe-area-bottom">
-        {NAV_ITEMS.map((item) => (
-          <button
-            key={item.page}
-            onClick={() => onNavigate(item.page)}
-            className={`flex-1 flex flex-col items-center gap-0.5 py-2 text-[10px] font-medium cursor-pointer transition-colors min-h-0 ${
-              page === item.page ? "text-indigo-600" : "text-gray-400"
-            }`}
-          >
-            <span className="text-xl leading-none">{item.icon}</span>
-            <span>{t[item.labelKey] as string}</span>
-          </button>
-        ))}
+      <nav
+        className="fixed bottom-0 left-0 right-0 z-40 flex border-t border-border bg-surface/95 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 shadow-mobile-nav backdrop-blur-xl md:hidden"
+        aria-label="Principal"
+      >
+        {NAV_ITEMS.map((item) => {
+          const active = page === item.page;
+          return (
+            <button
+              key={item.page}
+              onClick={() => onNavigate(item.page)}
+              aria-current={active ? "page" : undefined}
+              className={`relative flex min-h-[50px] flex-1 cursor-pointer flex-col items-center justify-center gap-1 rounded-xl text-[10px] font-semibold transition-colors ${
+                active ? "text-primary" : "text-muted-foreground"
+              }`}
+            >
+              {active && (
+                <span className="absolute inset-x-3 top-0 h-0.5 rounded-full bg-primary-highlight" />
+              )}
+              <Icon name={item.icon} size={20} />
+              <span>{t[item.labelKey as keyof typeof t] as string}</span>
+            </button>
+          );
+        })}
       </nav>
     </div>
   );
