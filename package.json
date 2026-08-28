@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "packageManager": "pnpm@11.20.0",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
@@ -16,7 +17,8 @@
     "test:e2e:report": "playwright show-report",
     "preview": "vite preview",
     "typecheck": "tsc -b",
-    "quality": "npm run typecheck && npm run lint && npm run test && npm run format:check",
+    "quality": "pnpm typecheck && pnpm lint && pnpm test && pnpm format:check",
+    "validate": "pnpm quality && pnpm build",
     "prepare": "husky"
   },
   "lint-staged": {
