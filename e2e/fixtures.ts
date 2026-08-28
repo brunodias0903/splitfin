@@ -9,7 +9,7 @@ export async function openApp(page: Page) {
 
 export async function navigateTo(page: Page, name: string) {
   const visibleNavigation = page.locator('nav[aria-label="Principal"]:visible');
-  await visibleNavigation.getByRole("button", { name, exact: true }).click();
+  await visibleNavigation.getByRole("link", { name, exact: true }).click();
 }
 
 export async function expectNoA11yViolations(page: Page, testInfo: TestInfo) {
