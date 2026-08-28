@@ -14,6 +14,7 @@
 ## Funcionalidades
 
 ### Controle Geral
+
 - [x] Registro de despesas avulsas (extrato/conta corrente)
 - [x] Despesas parceladas no cartão de crédito (visão 2/12, 5/24, etc.)
 - [x] Vínculo de parcelas a cartões específicos (nome + últimos 4 dígitos)
@@ -24,6 +25,7 @@
 - [ ] Lançamento futuro (despesas agendadas)
 
 ### Dashboard e Gráficos
+
 - [ ] Gráfico de rosca (donut) por categoria de gasto
 - [ ] Evolução mensal de despesas
 - [ ] Comparativo mês atual × mês anterior
@@ -31,6 +33,7 @@
 - [ ] Limite disponível por cartão
 
 ### Extrato Bancário
+
 - [ ] Upload/importação de extrato (OFX, CSV)
 - [ ] Conciliação automática com despesas registradas
 - [ ] Saldo disponível × saldo comprometido
@@ -39,16 +42,17 @@
 
 ## Stack
 
-| Camada | Tecnologia |
-|---|---|
-| Framework | React 19 |
-| Build | Vite 8 |
-| Linguagem | TypeScript 6 (strict mode) |
-| Estilização | Tailwind CSS 4 |
-| Testes | Vitest |
-| Linter | Oxlint |
-| Formatação | Prettier |
-| Hooks | Husky + lint-staged + commitlint |
+| Camada      | Tecnologia                       |
+| ----------- | -------------------------------- |
+| Framework   | Next.js 16 + React 19            |
+| Runtime     | Node.js 22                        |
+| Linguagem   | TypeScript 6 (strict mode)       |
+| Estilização | Tailwind CSS 4                   |
+| Testes      | Vitest + Playwright              |
+| Entrega     | Docker (standalone output)       |
+| Linter      | Oxlint                           |
+| Formatação  | Prettier                         |
+| Hooks       | Husky + lint-staged + commitlint |
 
 ---
 
@@ -59,6 +63,7 @@ pnpm install
 pnpm dev        # desenvolvimento
 pnpm build      # produção
 pnpm test       # testes
+pnpm test:e2e   # testes de navegador e acessibilidade
 pnpm quality    # typecheck + lint + test
 ```
 
@@ -67,6 +72,7 @@ pnpm quality    # typecheck + lint + test
 ## Quality pipeline
 
 Antes de cada commit:
+
 1. `lint-staged` — oxlint + prettier nos arquivos staged
 2. `typecheck` — TypeScript strict mode
 3. `test` — Vitest
@@ -74,6 +80,11 @@ Antes de cada commit:
 Branches, commits e pull requests seguem as regras descritas em
 [CONTRIBUTING.md](CONTRIBUTING.md). Pull requests utilizam um template com
 validação, risco, rollback e evidências visuais.
+
+## Arquitetura e roadmap
+
+- [Decisões arquiteturais](docs/architecture/README.md)
+- [Roadmap técnico](docs/roadmap.md)
 
 ---
 

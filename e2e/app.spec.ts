@@ -63,7 +63,7 @@ test.describe("experiência principal", () => {
   test("mantém navegação visível e não cria rolagem horizontal", async ({ page }) => {
     const navigation = page.locator('nav[aria-label="Principal"]:visible');
     await expect(navigation).toBeVisible();
-    await expect(navigation.getByRole("button")).toHaveCount(4);
+    await expect(navigation.getByRole("link")).toHaveCount(4);
 
     const hasHorizontalOverflow = await page.evaluate(
       () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
