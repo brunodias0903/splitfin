@@ -9,8 +9,8 @@
     "build": "next build --webpack",
     "start": "next start",
     "lint": "oxlint",
-    "format": "prettier --write \"{app,src,e2e}/**/*.{ts,tsx,css,json}\" \"*.{js,mjs,ts,json}\"",
-    "format:check": "prettier --check \"{app,src,e2e}/**/*.{ts,tsx,css,json}\" \"*.{js,mjs,ts,json}\"",
+    "format": "prettier --write \"{src,e2e}/**/*.{ts,tsx,css,json}\" \"*.{js,mjs,ts,json}\"",
+    "format:check": "prettier --check \"{src,e2e}/**/*.{ts,tsx,css,json}\" \"*.{js,mjs,ts,json}\"",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
@@ -22,10 +22,6 @@
     "prepare": "husky"
   },
   "lint-staged": {
-    "app/**/*.{ts,tsx}": [
-      "oxlint --fix",
-      "prettier --write"
-    ],
     "src/**/*.{ts,tsx}": [
       "oxlint --fix",
       "prettier --write"
