@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { Badge, Button, Heading, Input, NativeSelect, Surface, Text } from "../components/ui";
+import { Badge, Button, Heading, Input, NativeSelect, Surface, Text } from "@/shared/ui";
 
 describe("design system components", () => {
   it("renders semantic heading levels independently from visual variants", () => {
