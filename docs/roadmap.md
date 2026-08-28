@@ -14,10 +14,10 @@ reversíveis.
 
 ## M2 — Organização por domínio
 
-- [ ] Criar módulos de despesas, parcelas, cartões e contas.
-- [ ] Separar casos de uso de componentes React e persistência.
-- [ ] Cobrir cálculos monetários e datas com testes unitários.
-- [ ] Eliminar dependências circulares entre domínios.
+- [x] Criar módulos de despesas, parcelas, cartões e contas.
+- [x] Separar casos de uso de componentes React e persistência.
+- [x] Cobrir cálculos monetários e datas com testes unitários.
+- [x] Eliminar dependências circulares entre domínios.
 
 ## M3 — PostgreSQL
 

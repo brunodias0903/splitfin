@@ -6,9 +6,10 @@ substituída por outra.
 
 ## Decisões
 
-| ADR                                       | Estado | Decisão                                                 |
-| ----------------------------------------- | ------ | ------------------------------------------------------- |
-| [ADR-001](adr-001-nextjs-node-runtime.md) | Aceita | Next.js full-stack em runtime Node.js e artefato Docker |
+| ADR                                        | Estado | Decisão                                                 |
+| ------------------------------------------ | ------ | ------------------------------------------------------- |
+| [ADR-001](adr-001-nextjs-node-runtime.md)  | Aceita | Next.js full-stack em runtime Node.js e artefato Docker |
+| [ADR-002](adr-002-modular-monolith.md)     | Aceita | Monólito modular orientado a domínios                   |
 
 ## Princípios
 
