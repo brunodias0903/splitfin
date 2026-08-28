@@ -14,7 +14,8 @@
 
 html,
 body,
-#root {
+#root,
+#__next {
   min-height: 100%;
   margin: 0;
 }

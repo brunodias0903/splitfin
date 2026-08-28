@@ -44,11 +44,12 @@
 
 | Layer      | Technology                       |
 | ---------- | -------------------------------- |
-| Framework  | React 19                         |
-| Build      | Vite 8                           |
+| Framework  | Next.js 16 + React 19            |
+| Runtime    | Node.js 22                        |
 | Language   | TypeScript 6 (strict mode)       |
 | Styling    | Tailwind CSS 4                   |
-| Testing    | Vitest                           |
+| Testing    | Vitest + Playwright              |
+| Delivery   | Docker (standalone output)       |
 | Linter     | Oxlint                           |
 | Formatting | Prettier                         |
 | Hooks      | Husky + lint-staged + commitlint |
@@ -62,6 +63,7 @@ pnpm install
 pnpm dev        # development
 pnpm build      # production
 pnpm test       # tests
+pnpm test:e2e   # browser and accessibility tests
 pnpm quality    # typecheck + lint + test
 ```
 

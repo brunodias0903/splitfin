@@ -44,11 +44,12 @@
 
 | Camada      | Tecnologia                       |
 | ----------- | -------------------------------- |
-| Framework   | React 19                         |
-| Build       | Vite 8                           |
+| Framework   | Next.js 16 + React 19            |
+| Runtime     | Node.js 22                        |
 | Linguagem   | TypeScript 6 (strict mode)       |
 | Estilização | Tailwind CSS 4                   |
-| Testes      | Vitest                           |
+| Testes      | Vitest + Playwright              |
+| Entrega     | Docker (standalone output)       |
 | Linter      | Oxlint                           |
 | Formatação  | Prettier                         |
 | Hooks       | Husky + lint-staged + commitlint |
@@ -62,6 +63,7 @@ pnpm install
 pnpm dev        # desenvolvimento
 pnpm build      # produção
 pnpm test       # testes
+pnpm test:e2e   # testes de navegador e acessibilidade
 pnpm quality    # typecheck + lint + test
 ```
 

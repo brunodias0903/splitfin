@@ -5,12 +5,12 @@ reversíveis.
 
 ## M1 — Fundação Next.js
 
-- [ ] Substituir o shell Vite por Next.js App Router.
-- [ ] Preservar design system, Poppins e responsividade.
-- [ ] Adaptar Vitest e Playwright ao novo servidor.
-- [ ] Garantir que os 28 testes unitários e os 22 E2E continuem passando.
-- [ ] Adicionar health check básico.
-- [ ] Criar Dockerfile multi-stage executando Next.js standalone.
+- [x] Substituir o shell Vite por Next.js App Router.
+- [x] Preservar design system, Poppins e responsividade.
+- [x] Adaptar Vitest e Playwright ao novo servidor.
+- [x] Garantir que os 28 testes unitários e os 24 E2E continuem passando.
+- [x] Adicionar health check básico.
+- [x] Criar Dockerfile multi-stage executando Next.js standalone.
 
 ## M2 — Organização por domínio
 
