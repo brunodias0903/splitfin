@@ -4,7 +4,7 @@ Este documento é a fonte operacional para retomar o Splitfin em outra máquina
 ou trabalhar em mais de uma frente. O [roadmap](roadmap.md) registra os marcos;
 este guia detalha ordem, dependências, entregas e critérios de aceite.
 
-> Última consolidação: 31 de agosto de 2026, após o merge da PR #17.
+> Última consolidação: 31 de agosto de 2026, após o merge da PR #19.
 
 ## Estado atual
 
@@ -23,12 +23,14 @@ este guia detalha ordem, dependências, entregas e critérios de aceite.
 - decisão de identidade com Better Auth autocontido e sessões no PostgreSQL.
 - cadastro, verificação de e-mail, login, logout e recuperação de senha;
 - rotas do workspace protegidas por sessão validada no servidor.
+- repositórios PostgreSQL com escopo de usuário para todos os agregados;
+- testes horizontais com dois usuários e validação de referências relacionadas.
 
 ### Estado transitório conhecido
 
 - a interface ainda persiste os dados financeiros em `localStorage`;
 - PostgreSQL está preparado, mas ainda não é consumido pela aplicação;
-- os dados financeiros ainda não estão isolados por usuário no servidor;
+- os repositórios do servidor estão isolados, mas a interface ainda não os consome;
 - não há ambiente de staging ou produção ativo;
 - Supabase e Vercel ainda aparecem como GitHub Apps da conta. O Splitfin não
   depende deles; qualquer remoção deve considerar os outros repositórios da
