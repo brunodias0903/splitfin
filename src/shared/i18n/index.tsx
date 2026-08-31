@@ -30,6 +30,8 @@ interface I18nContextValue {
   currency: string;
   formatCurrency: (value: number) => string;
   formatDate: (dateStr: string) => string;
+  formatLongDate: (date: Date) => string;
+  formatMonth: (yearMonth: string) => string;
   setLocale: (locale: Locale) => void;
 }
 
@@ -48,8 +50,32 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   const formatDate = (dateStr: string) =>
     new Intl.DateTimeFormat(localeStr).format(new Date(dateStr + "T00:00:00"));
 
+  const formatLongDate = (date: Date) =>
+    new Intl.DateTimeFormat(localeStr, {
+      weekday: "long",
+      day: "2-digit",
+      month: "short",
+    }).format(date);
+
+  const formatMonth = (yearMonth: string) =>
+    new Intl.DateTimeFormat(localeStr, {
+      year: "numeric",
+      month: "long",
+    }).format(new Date(`${yearMonth}-01T00:00:00`));
+
   return (
-    <I18nContext.Provider value={{ locale, t, currency, formatCurrency, formatDate, setLocale }}>
+    <I18nContext.Provider
+      value={{
+        locale,
+        t,
+        currency,
+        formatCurrency,
+        formatDate,
+        formatLongDate,
+        formatMonth,
+        setLocale,
+      }}
+    >
       {children}
     </I18nContext.Provider>
   );

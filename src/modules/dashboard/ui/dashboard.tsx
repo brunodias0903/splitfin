@@ -32,7 +32,7 @@ function isSameMonth(dateStr: string, yearMonth: string): boolean {
 }
 
 export default function Dashboard({ expenses, fixedExpenses, cards }: DashboardProps) {
-  const { t, formatCurrency, formatDate } = useLocale();
+  const { t, formatCurrency, formatDate, formatMonth } = useLocale();
   const now = new Date();
   const currentYM = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
   const [selectedMonth, setSelectedMonth] = useState(currentYM);
@@ -139,10 +139,7 @@ export default function Dashboard({ expenses, fixedExpenses, cards }: DashboardP
         >
           {monthOptions.map((ym) => (
             <option key={ym} value={ym}>
-              {new Date(`${ym}-01`).toLocaleDateString(undefined, {
-                year: "numeric",
-                month: "long",
-              })}
+              {formatMonth(ym)}
             </option>
           ))}
         </NativeSelect>

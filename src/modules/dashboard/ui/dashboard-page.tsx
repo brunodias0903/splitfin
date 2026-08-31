@@ -13,7 +13,7 @@ interface DashboardPageProps {
 }
 
 export default function DashboardPage({ expenses, fixedExpenses, cards }: DashboardPageProps) {
-  const { t, formatCurrency, formatDate } = useLocale();
+  const { t, formatCurrency, formatDate, formatLongDate } = useLocale();
 
   const recentExpenses = useMemo(() => {
     return [...expenses]
@@ -38,11 +38,7 @@ export default function DashboardPage({ expenses, fixedExpenses, cards }: Dashbo
           </Text>
         </div>
         <div className="hidden rounded-full border border-border bg-surface px-3.5 py-2 text-xs font-semibold text-muted-foreground shadow-sm sm:block">
-          {new Date().toLocaleDateString(undefined, {
-            weekday: "long",
-            day: "2-digit",
-            month: "short",
-          })}
+          {formatLongDate(new Date())}
         </div>
       </div>
 

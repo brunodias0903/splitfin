@@ -25,6 +25,21 @@ test.describe("experiência principal", () => {
     expect(styles.radius).toBe("1rem");
   });
 
+  test("hidrata o dashboard sem divergências entre servidor e navegador", async ({ page }) => {
+    const hydrationErrors: string[] = [];
+
+    page.on("console", (message) => {
+      if (message.type() === "error" && message.text().includes("Hydration failed")) {
+        hydrationErrors.push(message.text());
+      }
+    });
+
+    await page.reload();
+    await expect(page.getByRole("heading", { name: /bem-vindo/i })).toBeVisible();
+
+    expect(hydrationErrors).toEqual([]);
+  });
+
   test("registra e exibe uma despesa", async ({ page }) => {
     await navigateTo(page, "Despesas");
     await page.getByLabel("Descrição", { exact: true }).fill("Supermercado");
