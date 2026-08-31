@@ -1,6 +1,7 @@
 import { and, desc, eq } from "drizzle-orm";
 
 import { accounts, cards } from "@/shared/db/schema";
+import { recordAuditEventSafely } from "@/shared/security/audit";
 import {
   InvalidOwnedReferenceError,
   resolveCurrentUserId,
@@ -51,6 +52,12 @@ export function createPostgresCardRepository({
         .insert(cards)
         .values({ ...values, userId })
         .returning();
+      await recordAuditEventSafely(database, {
+        actorUserId: userId,
+        action: "finance.card.created",
+        entityType: "card",
+        entityId: card.id,
+      });
       return card;
     },
 
@@ -62,6 +69,13 @@ export function createPostgresCardRepository({
         .set({ ...values, userId, updatedAt: new Date() })
         .where(and(eq(cards.id, id), eq(cards.userId, userId)))
         .returning();
+      await recordAuditEventSafely(database, {
+        actorUserId: userId,
+        action: "finance.card.updated",
+        outcome: card ? "success" : "denied",
+        entityType: "card",
+        entityId: id,
+      });
       return card ?? null;
     },
 
@@ -71,6 +85,13 @@ export function createPostgresCardRepository({
         .delete(cards)
         .where(and(eq(cards.id, id), eq(cards.userId, userId)))
         .returning({ id: cards.id });
+      await recordAuditEventSafely(database, {
+        actorUserId: userId,
+        action: "finance.card.deleted",
+        outcome: card ? "success" : "denied",
+        entityType: "card",
+        entityId: id,
+      });
       return Boolean(card);
     },
   };

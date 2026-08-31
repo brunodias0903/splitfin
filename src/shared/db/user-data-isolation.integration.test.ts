@@ -10,7 +10,7 @@ import { createPostgresInstallmentRepository } from "@/modules/installments/infr
 import { InvalidOwnedReferenceError } from "@/shared/db/user-scope";
 
 import { closeDatabase, getDatabase } from "./client";
-import { categories, users } from "./schema";
+import { categories, securityAuditEvents, users } from "./schema";
 
 const database = getDatabase();
 const aliceId = "20000000-0000-4000-8000-000000000001";
@@ -37,6 +37,7 @@ const bob = {
 
 beforeAll(async () => {
   await migrate(database, { migrationsFolder: "drizzle" });
+  await database.delete(securityAuditEvents);
   await database.delete(users).where(inArray(users.id, testUserIds));
   await database.insert(users).values([
     { id: aliceId, email: "alice-isolation@splitfin.local", name: "Alice" },
@@ -54,6 +55,7 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
+  await database.delete(securityAuditEvents);
   await database.delete(users).where(inArray(users.id, testUserIds));
   await database.delete(categories).where(eq(categories.id, systemCategoryId));
   await closeDatabase();
@@ -199,5 +201,16 @@ describe("PostgreSQL user data isolation", () => {
     await expect(bob.expenses.findById(bobExpense.id)).resolves.toMatchObject({
       description: "Bob expense",
     });
+  });
+
+  it("audits successful and denied financial mutations without financial payloads", async () => {
+    const events = await database
+      .select()
+      .from(securityAuditEvents)
+      .where(eq(securityAuditEvents.actorUserId, aliceId));
+
+    expect(events.some(({ outcome }) => outcome === "success")).toBe(true);
+    expect(events.some(({ outcome }) => outcome === "denied")).toBe(true);
+    expect(events.every(({ metadata }) => metadata == null)).toBe(true);
   });
 });

@@ -1,6 +1,7 @@
 import { and, desc, eq, isNull, or } from "drizzle-orm";
 
 import { categories } from "@/shared/db/schema";
+import { recordAuditEventSafely } from "@/shared/security/audit";
 import { resolveCurrentUserId, type ScopedRepositoryDependencies } from "@/shared/db/user-scope";
 
 type CategoryValues = Omit<
@@ -41,6 +42,12 @@ export function createPostgresCategoryRepository({
         .insert(categories)
         .values({ ...values, userId })
         .returning();
+      await recordAuditEventSafely(database, {
+        actorUserId: userId,
+        action: "finance.category.created",
+        entityType: "category",
+        entityId: category.id,
+      });
       return category;
     },
 
@@ -51,6 +58,13 @@ export function createPostgresCategoryRepository({
         .set({ ...values, userId, updatedAt: new Date() })
         .where(and(eq(categories.id, id), eq(categories.userId, userId)))
         .returning();
+      await recordAuditEventSafely(database, {
+        actorUserId: userId,
+        action: "finance.category.updated",
+        outcome: category ? "success" : "denied",
+        entityType: "category",
+        entityId: id,
+      });
       return category ?? null;
     },
 
@@ -60,6 +74,13 @@ export function createPostgresCategoryRepository({
         .delete(categories)
         .where(and(eq(categories.id, id), eq(categories.userId, userId)))
         .returning({ id: categories.id });
+      await recordAuditEventSafely(database, {
+        actorUserId: userId,
+        action: "finance.category.deleted",
+        outcome: category ? "success" : "denied",
+        entityType: "category",
+        entityId: id,
+      });
       return Boolean(category);
     },
   };

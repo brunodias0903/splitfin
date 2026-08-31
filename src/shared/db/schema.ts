@@ -6,6 +6,7 @@ import {
   date,
   index,
   integer,
+  jsonb,
   pgEnum,
   pgTable,
   text,
@@ -109,6 +110,32 @@ export const authVerifications = pgTable(
   (table) => [
     index("auth_verifications_identifier_idx").on(table.identifier),
     index("auth_verifications_expires_at_idx").on(table.expiresAt),
+  ],
+);
+
+export const authRateLimits = pgTable("auth_rate_limits", {
+  key: text("key").primaryKey(),
+  count: integer("count").notNull(),
+  lastRequest: bigint("last_request", { mode: "number" }).notNull(),
+});
+
+export const securityAuditEvents = pgTable(
+  "security_audit_events",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    actorUserId: uuid("actor_user_id").references(() => users.id, { onDelete: "set null" }),
+    action: text("action").notNull(),
+    outcome: text("outcome").default("success").notNull(),
+    entityType: text("entity_type"),
+    entityId: uuid("entity_id"),
+    requestId: text("request_id"),
+    metadata: jsonb("metadata").$type<Record<string, string | number | boolean | null>>(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    index("security_audit_actor_created_at_idx").on(table.actorUserId, table.createdAt),
+    index("security_audit_action_created_at_idx").on(table.action, table.createdAt),
+    index("security_audit_created_at_idx").on(table.createdAt),
   ],
 );
 
@@ -255,6 +282,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   categories: many(categories),
   expenses: many(expenses),
   installmentPlans: many(installmentPlans),
+  securityAuditEvents: many(securityAuditEvents),
 }));
 
 export const authIdentitiesRelations = relations(authIdentities, ({ one }) => ({
@@ -263,6 +291,10 @@ export const authIdentitiesRelations = relations(authIdentities, ({ one }) => ({
 
 export const authSessionsRelations = relations(authSessions, ({ one }) => ({
   user: one(users, { fields: [authSessions.userId], references: [users.id] }),
+}));
+
+export const securityAuditEventsRelations = relations(securityAuditEvents, ({ one }) => ({
+  actor: one(users, { fields: [securityAuditEvents.actorUserId], references: [users.id] }),
 }));
 
 export const accountsRelations = relations(accounts, ({ one, many }) => ({
