@@ -34,7 +34,7 @@ para alternar entre macOS e WSL estão no
 ## M4 — Identidade e autorização
 
 - [x] Definir arquitetura, sessão e modelo de ameaças de autenticação.
-- [ ] Implementar login e sessão no servidor.
+- [x] Implementar login e sessão no servidor.
 - [ ] Isolar todas as consultas por usuário.
 - [ ] Adicionar rate limiting e auditoria de operações sensíveis.
 - [ ] Testar acesso indevido entre usuários.
