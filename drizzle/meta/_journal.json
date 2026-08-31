@@ -15,6 +15,13 @@
       "when": 1788200359833,
       "tag": "0001_fixed_gorgon",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1788206668782,
+      "tag": "0002_young_slipstream",
+      "breakpoints": true
     }
   ]
 }

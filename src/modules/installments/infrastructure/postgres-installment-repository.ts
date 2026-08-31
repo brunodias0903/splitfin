@@ -1,6 +1,7 @@
 import { and, desc, eq, isNull, or } from "drizzle-orm";
 
 import { cards, categories, installmentPlans } from "@/shared/db/schema";
+import { recordAuditEventSafely } from "@/shared/security/audit";
 import {
   InvalidOwnedReferenceError,
   resolveCurrentUserId,
@@ -72,6 +73,12 @@ export function createPostgresInstallmentRepository({
         .insert(installmentPlans)
         .values({ ...values, userId })
         .returning();
+      await recordAuditEventSafely(database, {
+        actorUserId: userId,
+        action: "finance.installment.created",
+        entityType: "installment_plan",
+        entityId: plan.id,
+      });
       return plan;
     },
 
@@ -83,6 +90,13 @@ export function createPostgresInstallmentRepository({
         .set({ ...values, userId, updatedAt: new Date() })
         .where(and(eq(installmentPlans.id, id), eq(installmentPlans.userId, userId)))
         .returning();
+      await recordAuditEventSafely(database, {
+        actorUserId: userId,
+        action: "finance.installment.updated",
+        outcome: plan ? "success" : "denied",
+        entityType: "installment_plan",
+        entityId: id,
+      });
       return plan ?? null;
     },
 
@@ -92,6 +106,13 @@ export function createPostgresInstallmentRepository({
         .delete(installmentPlans)
         .where(and(eq(installmentPlans.id, id), eq(installmentPlans.userId, userId)))
         .returning({ id: installmentPlans.id });
+      await recordAuditEventSafely(database, {
+        actorUserId: userId,
+        action: "finance.installment.deleted",
+        outcome: plan ? "success" : "denied",
+        entityType: "installment_plan",
+        entityId: id,
+      });
       return Boolean(plan);
     },
   };

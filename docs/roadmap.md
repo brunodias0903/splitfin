@@ -36,7 +36,7 @@ para alternar entre macOS e WSL estão no
 - [x] Definir arquitetura, sessão e modelo de ameaças de autenticação.
 - [x] Implementar login e sessão no servidor.
 - [x] Isolar todas as consultas por usuário.
-- [ ] Adicionar rate limiting e auditoria de operações sensíveis.
+- [x] Adicionar rate limiting e auditoria de operações sensíveis.
 - [x] Testar acesso indevido entre usuários.
 
 ## M5 — Migração de dados e regras

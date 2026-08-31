@@ -7,6 +7,8 @@ import { nextCookies } from "better-auth/next-js";
 import { sendAuthEmail } from "./auth-email";
 import { getDatabase } from "@/shared/db/client";
 import { authIdentities, authSessions, authVerifications, users } from "@/shared/db/schema";
+import { recordAuditEventSafely } from "@/shared/security/audit";
+import { createPostgresRateLimitStorage } from "@/shared/security/rate-limit-storage";
 
 const appUrl = process.env.BETTER_AUTH_URL;
 const authSecret = process.env.BETTER_AUTH_SECRET;
@@ -16,11 +18,13 @@ if (!authSecret || authSecret.length < 32) {
   throw new Error("BETTER_AUTH_SECRET must contain at least 32 characters.");
 }
 
+const database = getDatabase();
+
 export const auth = betterAuth({
   appName: "Splitfin",
   baseURL: appUrl,
   secret: authSecret,
-  database: drizzleAdapter(getDatabase(), {
+  database: drizzleAdapter(database, {
     provider: "pg",
     schema: {
       user: users,
@@ -38,6 +42,59 @@ export const auth = betterAuth({
   trustedOrigins: [appUrl],
   rateLimit: {
     enabled: process.env.BETTER_AUTH_RATE_LIMIT_DISABLED !== "true",
+    window: 60,
+    max: 100,
+    customStorage: createPostgresRateLimitStorage(database, authSecret),
+    customRules: {
+      "/sign-in/email": { window: 60, max: 10 },
+      "/sign-up/email": { window: 60 * 60, max: 5 },
+      "/request-password-reset": { window: 60 * 60, max: 5 },
+      "/reset-password": { window: 15 * 60, max: 5 },
+    },
+  },
+  databaseHooks: {
+    user: {
+      create: {
+        after: async (user) =>
+          recordAuditEventSafely(database, {
+            actorUserId: user.id,
+            action: "auth.identity.created",
+            entityType: "user",
+            entityId: user.id,
+          }),
+      },
+    },
+    account: {
+      update: {
+        after: async (account) =>
+          recordAuditEventSafely(database, {
+            actorUserId: account.userId,
+            action: "auth.identity.updated",
+            entityType: "user",
+            entityId: account.userId,
+          }),
+      },
+    },
+    session: {
+      create: {
+        after: async (session) =>
+          recordAuditEventSafely(database, {
+            actorUserId: session.userId,
+            action: "auth.session.created",
+            entityType: "session",
+            entityId: session.id,
+          }),
+      },
+      delete: {
+        after: async (session) =>
+          recordAuditEventSafely(database, {
+            actorUserId: session.userId,
+            action: "auth.session.revoked",
+            entityType: "session",
+            entityId: session.id,
+          }),
+      },
+    },
   },
   user: {
     modelName: "user",

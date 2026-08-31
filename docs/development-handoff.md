@@ -25,6 +25,8 @@ este guia detalha ordem, dependências, entregas e critérios de aceite.
 - rotas do workspace protegidas por sessão validada no servidor.
 - repositórios PostgreSQL com escopo de usuário para todos os agregados;
 - testes horizontais com dois usuários e validação de referências relacionadas.
+- rate limiting persistente, auditoria de segurança, retenção e headers HTTP;
+- respostas de autenticação padronizadas e proteção de origem testada.
 
 ### Estado transitório conhecido
 
