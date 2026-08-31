@@ -4,10 +4,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useLocale, type Locale } from "@/shared/i18n";
 import { Icon, type IconName } from "@/shared/ui/icons";
-import { NativeSelect } from "@/shared/ui";
+import { authClient } from "@/modules/auth/infrastructure/auth-client";
+import { Button, NativeSelect } from "@/shared/ui";
 
 interface LayoutProps {
   children: React.ReactNode;
+  user: { name: string; email: string };
 }
 
 const NAV_ITEMS: { href: string; labelKey: string; icon: IconName }[] = [
@@ -17,7 +19,7 @@ const NAV_ITEMS: { href: string; labelKey: string; icon: IconName }[] = [
   { href: "/cards", labelKey: "navCards", icon: "cards" },
 ];
 
-export default function AppShell({ children }: LayoutProps) {
+export default function AppShell({ children, user }: LayoutProps) {
   const { t, locale, setLocale } = useLocale();
   const pathname = usePathname();
 
@@ -70,7 +72,23 @@ export default function AppShell({ children }: LayoutProps) {
           })}
         </nav>
 
-        <div className="relative m-4 rounded-2xl border border-on-brand/8 bg-surface/4 p-3.5">
+        <div className="relative mx-4 mb-2 rounded-2xl border border-on-brand/8 bg-surface/4 p-3.5">
+          <p className="truncate text-xs font-semibold text-on-brand">{user.name}</p>
+          <p className="mt-0.5 truncate text-[10px] text-on-dark-muted">{user.email}</p>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="mt-2 w-full text-on-dark-muted hover:bg-surface/8 hover:text-on-brand"
+            onClick={() =>
+              authClient.signOut({ fetchOptions: { onSuccess: () => location.assign("/login") } })
+            }
+          >
+            Sair
+          </Button>
+        </div>
+
+        <div className="relative m-4 mt-0 rounded-2xl border border-on-brand/8 bg-surface/4 p-3.5">
           <label className="mb-2 block text-[10px] font-bold uppercase tracking-wider text-on-dark-muted">
             {t.language}
           </label>
@@ -95,16 +113,28 @@ export default function AppShell({ children }: LayoutProps) {
             </div>
             <span className="font-bold tracking-tight text-strong">Splitfin</span>
           </div>
-          <NativeSelect
-            value={locale}
-            onChange={(e) => setLocale(e.target.value as Locale)}
-            aria-label="Idioma"
-            className="w-16"
-            size="sm"
-          >
-            <option value="pt-BR">PT</option>
-            <option value="en">EN</option>
-          </NativeSelect>
+          <div className="flex items-center gap-2">
+            <NativeSelect
+              value={locale}
+              onChange={(e) => setLocale(e.target.value as Locale)}
+              aria-label="Idioma"
+              className="w-16"
+              size="sm"
+            >
+              <option value="pt-BR">PT</option>
+              <option value="en">EN</option>
+            </NativeSelect>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() =>
+                authClient.signOut({ fetchOptions: { onSuccess: () => location.assign("/login") } })
+              }
+            >
+              Sair
+            </Button>
+          </div>
         </header>
         <div className="ds-page-container">{children}</div>
       </main>

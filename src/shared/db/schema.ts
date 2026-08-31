@@ -1,6 +1,7 @@
 import { relations, sql } from "drizzle-orm";
 import {
   bigint,
+  boolean,
   check,
   date,
   index,
@@ -44,9 +45,71 @@ export const users = pgTable(
     id: uuid("id").defaultRandom().primaryKey(),
     email: text("email").notNull(),
     name: text("name").notNull(),
+    emailVerified: boolean("email_verified").default(false).notNull(),
+    image: text("image"),
     ...timestamps,
   },
   (table) => [uniqueIndex("users_email_unique").on(sql`lower(${table.email})`)],
+);
+
+export const authIdentities = pgTable(
+  "auth_identities",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    providerId: text("provider_id").notNull(),
+    issuer: text("issuer").notNull(),
+    accountId: text("account_id").notNull(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    accessToken: text("access_token"),
+    refreshToken: text("refresh_token"),
+    idToken: text("id_token"),
+    accessTokenExpiresAt: timestamp("access_token_expires_at", { withTimezone: true }),
+    refreshTokenExpiresAt: timestamp("refresh_token_expires_at", { withTimezone: true }),
+    scope: text("scope"),
+    password: text("password"),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("auth_identities_issuer_account_unique").on(table.issuer, table.accountId),
+    index("auth_identities_user_id_idx").on(table.userId),
+  ],
+);
+
+export const authSessions = pgTable(
+  "auth_sessions",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    token: text("token").notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    ipAddress: text("ip_address"),
+    userAgent: text("user_agent"),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("auth_sessions_token_unique").on(table.token),
+    index("auth_sessions_user_id_idx").on(table.userId),
+    index("auth_sessions_expires_at_idx").on(table.expiresAt),
+  ],
+);
+
+export const authVerifications = pgTable(
+  "auth_verifications",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    identifier: text("identifier").notNull(),
+    value: text("value").notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    index("auth_verifications_identifier_idx").on(table.identifier),
+    index("auth_verifications_expires_at_idx").on(table.expiresAt),
+  ],
 );
 
 export const accounts = pgTable(
@@ -185,11 +248,21 @@ export const expenses = pgTable(
 );
 
 export const usersRelations = relations(users, ({ many }) => ({
+  authIdentities: many(authIdentities),
+  authSessions: many(authSessions),
   accounts: many(accounts),
   cards: many(cards),
   categories: many(categories),
   expenses: many(expenses),
   installmentPlans: many(installmentPlans),
+}));
+
+export const authIdentitiesRelations = relations(authIdentities, ({ one }) => ({
+  user: one(users, { fields: [authIdentities.userId], references: [users.id] }),
+}));
+
+export const authSessionsRelations = relations(authSessions, ({ one }) => ({
+  user: one(users, { fields: [authSessions.userId], references: [users.id] }),
 }));
 
 export const accountsRelations = relations(accounts, ({ one, many }) => ({
@@ -234,6 +307,8 @@ export const expensesRelations = relations(expenses, ({ one }) => ({
 
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
+export type AuthIdentity = typeof authIdentities.$inferSelect;
+export type AuthSession = typeof authSessions.$inferSelect;
 export type Account = typeof accounts.$inferSelect;
 export type Card = typeof cards.$inferSelect;
 export type Category = typeof categories.$inferSelect;

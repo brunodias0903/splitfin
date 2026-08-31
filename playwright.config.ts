@@ -1,7 +1,14 @@
+import { createRequire } from "node:module";
 import { defineConfig, devices } from "@playwright/test";
 
+const require = createRequire(import.meta.url);
+const { loadEnvConfig } = require("@next/env") as typeof import("@next/env");
 const port = 4173;
 const baseURL = `http://127.0.0.1:${port}`;
+
+loadEnvConfig(process.cwd(), true);
+process.env.BETTER_AUTH_URL = baseURL;
+process.env.BETTER_AUTH_RATE_LIMIT_DISABLED = "true";
 
 export default defineConfig({
   testDir: "./e2e",

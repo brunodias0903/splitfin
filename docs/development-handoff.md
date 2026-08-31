@@ -21,13 +21,14 @@ este guia detalha ordem, dependências, entregas e critérios de aceite.
 - valores monetários persistidos como centavos inteiros;
 - runbook de migrations, backup e restauração.
 - decisão de identidade com Better Auth autocontido e sessões no PostgreSQL.
+- cadastro, verificação de e-mail, login, logout e recuperação de senha;
+- rotas do workspace protegidas por sessão validada no servidor.
 
 ### Estado transitório conhecido
 
 - a interface ainda persiste os dados financeiros em `localStorage`;
 - PostgreSQL está preparado, mas ainda não é consumido pela aplicação;
-- login, sessão e autorização ainda não foram implementados; a arquitetura está
-  definida no ADR-004;
+- os dados financeiros ainda não estão isolados por usuário no servidor;
 - não há ambiente de staging ou produção ativo;
 - Supabase e Vercel ainda aparecem como GitHub Apps da conta. O Splitfin não
   depende deles; qualquer remoção deve considerar os outros repositórios da

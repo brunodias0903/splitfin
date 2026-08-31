@@ -61,12 +61,20 @@
 
 ```bash
 pnpm install
-pnpm dev        # desenvolvimento
+cp .env.example .env.local
+pnpm db:up      # PostgreSQL e Mailpit
+pnpm db:migrate # primeira execução ou após novas migrations
+pnpm dev        # http://localhost:3000
 pnpm build      # produção
 pnpm test       # testes
 pnpm test:e2e   # testes de navegador e acessibilidade
 pnpm quality    # typecheck + lint + test
 ```
+
+O cadastro exige confirmação de e-mail. Em desenvolvimento, abra o Mailpit em
+`http://localhost:8025` para acessar a mensagem. Substitua
+`BETTER_AUTH_SECRET` em `.env.local` por um valor gerado com
+`openssl rand -base64 32`; nunca reutilize esse segredo em outro ambiente.
 
 O fluxo local do banco e a política de migrations estão documentados em
 [docs/database.md](docs/database.md).

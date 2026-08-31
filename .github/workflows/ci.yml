@@ -57,6 +57,10 @@ jobs:
     name: Quality and build
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      DATABASE_URL: postgresql://splitfin:splitfin@localhost:5432/splitfin
+      BETTER_AUTH_SECRET: ci-only-secret-with-at-least-32-characters
+      BETTER_AUTH_URL: http://localhost:3000
     steps:
       - uses: actions/checkout@v7
 
@@ -116,6 +120,33 @@ jobs:
         project:
           - desktop-chromium
           - mobile-chromium
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: splitfin
+          POSTGRES_USER: splitfin
+          POSTGRES_PASSWORD: splitfin
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U splitfin -d splitfin"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+      mailpit:
+        image: axllent/mailpit:v1.27
+        ports:
+          - 1025:1025
+          - 8025:8025
+    env:
+      DATABASE_URL: postgresql://splitfin:splitfin@localhost:5432/splitfin
+      BETTER_AUTH_SECRET: ci-only-secret-with-at-least-32-characters
+      BETTER_AUTH_URL: http://127.0.0.1:4173
+      AUTH_SMTP_HOST: localhost
+      AUTH_SMTP_PORT: 1025
+      AUTH_SMTP_SECURE: false
+      AUTH_EMAIL_FROM: Splitfin <no-reply@splitfin.local>
     steps:
       - uses: actions/checkout@v7
 
@@ -127,6 +158,7 @@ jobs:
           cache: pnpm
 
       - run: pnpm install --frozen-lockfile
+      - run: pnpm db:migrate
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm test:e2e --project=${{ matrix.project }}
 
