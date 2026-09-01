@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Card } from "@/modules/cards/domain/card";
 import { toManausParts } from "../application/persisted-expense";
 import { CATEGORIES, PAYMENT_TYPES, type Expense, type ExpenseData } from "../domain/expense";
@@ -28,6 +28,7 @@ export default function ExpenseForm({
   const [category, setCategory] = useState<string>(CATEGORIES[0]);
   const [date, setDate] = useState(() => toManausParts(new Date()).date);
   const [time, setTime] = useState("");
+  const submittingRef = useRef(false);
 
   const isCardPayment = paymentType === "credit" || paymentType === "debit";
 
@@ -53,16 +54,21 @@ export default function ExpenseForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!description.trim() || !amount) return;
-    const succeeded = await onSubmit({
-      description: description.trim(),
-      amount: parseFloat(amount),
-      paymentType,
-      category,
-      date,
-      time: time || undefined,
-    });
-    if (succeeded) resetForm();
+    if (submittingRef.current || !description.trim() || !amount) return;
+    submittingRef.current = true;
+    try {
+      const succeeded = await onSubmit({
+        description: description.trim(),
+        amount: parseFloat(amount),
+        paymentType,
+        category,
+        date,
+        time: time || undefined,
+      });
+      if (succeeded) resetForm();
+    } finally {
+      submittingRef.current = false;
+    }
   };
 
   const isEditing = !!editingExpense;

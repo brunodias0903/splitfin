@@ -57,7 +57,9 @@ test.describe("experiência principal", () => {
     const secondPage = await secondContext.newPage();
     await signInExistingAccount(secondPage);
     await secondPage.goto("/expenses");
-    await expect(secondPage.getByText("Supermercado", { exact: true })).toBeVisible();
+    const persistedExpense = secondPage.getByRole("listitem").filter({ hasText: "Supermercado" });
+    await expect(persistedExpense).toHaveCount(1);
+    await expect(persistedExpense.getByText("Supermercado", { exact: true })).toBeVisible();
     await secondContext.close();
 
     await page.getByRole("listitem").getByRole("button", { name: "Editar" }).click();
