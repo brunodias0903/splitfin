@@ -9,7 +9,7 @@ export function createCard(
   const cardType: CardType = CARD_TYPES.includes(type as CardType)
     ? (type as CardType)
     : "multiple";
-  return { id: createId(), name: name.trim(), last4, type: cardType };
+  return { id: createId(), name: name.trim(), last4, type: cardType, closingDay: 5, dueDay: 12 };
 }
 
 export function removeCard(cards: Card[], id: string): Card[] {

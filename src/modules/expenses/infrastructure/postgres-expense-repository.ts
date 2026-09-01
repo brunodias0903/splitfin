@@ -39,7 +39,7 @@ export function createPostgresExpenseRepository({
       const [card] = await database
         .select({ id: cards.id })
         .from(cards)
-        .where(and(eq(cards.id, values.cardId), eq(cards.userId, userId)))
+        .where(and(eq(cards.id, values.cardId), eq(cards.userId, userId), isNull(cards.archivedAt)))
         .limit(1);
       if (!card) throw new InvalidOwnedReferenceError("card");
     }

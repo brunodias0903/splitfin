@@ -11,10 +11,12 @@ interface InstallmentsPageProps {
   editingId: string | null;
   onStartEdit: (id: string | null) => void;
   onCancelEdit: () => void;
-  onAddFixedExpense: (data: InstallmentData) => void;
-  onUpdateFixedExpense: (data: InstallmentData) => void;
-  onDeleteFixedExpense: (id: string) => void;
-  onPayInstallment: (id: string) => void;
+  onAddFixedExpense: (data: InstallmentData) => Promise<boolean>;
+  onUpdateFixedExpense: (data: InstallmentData) => Promise<boolean>;
+  onDeleteFixedExpense: (id: string) => Promise<void>;
+  onPayInstallment: (id: string) => Promise<void>;
+  pending?: boolean;
+  error?: string | null;
 }
 
 export default function InstallmentsPage({
@@ -27,6 +29,8 @@ export default function InstallmentsPage({
   onUpdateFixedExpense,
   onDeleteFixedExpense,
   onPayInstallment,
+  pending,
+  error,
 }: InstallmentsPageProps) {
   const { t } = useLocale();
   const editingFixedExpense = editingId ? fixedExpenses.find((e) => e.id === editingId) : undefined;
@@ -45,11 +49,17 @@ export default function InstallmentsPage({
         </Text>
       </div>
       <div className="ds-content-grid">
+        {error && (
+          <p role="alert" className="rounded-xl bg-danger-soft p-3 text-sm text-danger">
+            {error}
+          </p>
+        )}
         <FixedExpenseForm
           onSubmit={editingId ? onUpdateFixedExpense : onAddFixedExpense}
           editingFixedExpense={editingFixedExpense}
           onCancelEdit={onCancelEdit}
           cards={cards}
+          pending={pending}
         />
         <FixedExpenseList
           fixedExpenses={fixedExpenses}

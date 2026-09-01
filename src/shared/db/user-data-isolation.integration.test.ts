@@ -10,7 +10,7 @@ import { createPostgresInstallmentRepository } from "@/modules/installments/infr
 import { InvalidOwnedReferenceError } from "@/shared/db/user-scope";
 
 import { closeDatabase, getDatabase } from "./client";
-import { categories, securityAuditEvents, users } from "./schema";
+import { categories, expenses, securityAuditEvents, users } from "./schema";
 
 const database = getDatabase();
 const aliceId = "20000000-0000-4000-8000-000000000001";
@@ -172,6 +172,66 @@ describe("PostgreSQL user data isolation", () => {
       alice.installments.update(bobPlan.id, { description: "Taken" }),
     ).resolves.toBeNull();
     await expect(alice.installments.remove(bobPlan.id)).resolves.toBe(false);
+  });
+
+  it("pays installments atomically and treats a repeated expected state as idempotent", async () => {
+    const card = await alice.cards.create({
+      name: "Alice idempotent card",
+      lastFourDigits: "4444",
+      type: "credit",
+      closingDay: 7,
+      dueDay: 14,
+    });
+    const plan = await alice.installments.create({
+      cardId: card.id,
+      description: "Idempotent plan",
+      totalAmountCents: 10_000,
+      totalInstallments: 3,
+      startsOn: "2026-09-01",
+    });
+
+    await Promise.all([
+      alice.installments.payNext(plan.id, 0),
+      alice.installments.payNext(plan.id, 0),
+    ]);
+
+    await expect(alice.installments.findById(plan.id)).resolves.toMatchObject({
+      paidInstallments: 1,
+    });
+    const generated = await database
+      .select()
+      .from(expenses)
+      .where(eq(expenses.installmentPlanId, plan.id));
+    expect(generated).toHaveLength(1);
+    expect(generated[0]).toMatchObject({
+      installmentNumber: 1,
+      amountCents: 3_334,
+      cardId: card.id,
+    });
+
+    await expect(alice.installments.archive(plan.id)).resolves.toBe(true);
+    expect((await alice.installments.list()).map(({ id }) => id)).not.toContain(plan.id);
+    await expect(alice.cards.archive(card.id)).resolves.toBe(true);
+    expect((await alice.cards.list()).map(({ id }) => id)).not.toContain(card.id);
+    await expect(alice.cards.update(card.id, { dueDay: 20 })).resolves.toBeNull();
+    await expect(
+      alice.expenses.create({
+        cardId: card.id,
+        description: "Archived card expense",
+        amountCents: 1_000,
+        paymentType: "credit_card",
+        occurredAt: new Date("2026-09-01T12:00:00.000Z"),
+      }),
+    ).rejects.toBeInstanceOf(InvalidOwnedReferenceError);
+    await expect(
+      alice.installments.create({
+        cardId: card.id,
+        description: "Archived card plan",
+        totalAmountCents: 2_000,
+        totalInstallments: 2,
+        startsOn: "2026-09-01",
+      }),
+    ).rejects.toBeInstanceOf(InvalidOwnedReferenceError);
   });
 
   it("scopes expenses and rejects every cross-user financial reference", async () => {

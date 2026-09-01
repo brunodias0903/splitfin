@@ -1,4 +1,4 @@
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, isNull } from "drizzle-orm";
 
 import { accounts, cards } from "@/shared/db/schema";
 import { recordAuditEventSafely } from "@/shared/security/audit";
@@ -31,7 +31,7 @@ export function createPostgresCardRepository({
       return database
         .select()
         .from(cards)
-        .where(eq(cards.userId, userId))
+        .where(and(eq(cards.userId, userId), isNull(cards.archivedAt)))
         .orderBy(desc(cards.createdAt));
     },
 
@@ -67,7 +67,7 @@ export function createPostgresCardRepository({
       const [card] = await database
         .update(cards)
         .set({ ...values, userId, updatedAt: new Date() })
-        .where(and(eq(cards.id, id), eq(cards.userId, userId)))
+        .where(and(eq(cards.id, id), eq(cards.userId, userId), isNull(cards.archivedAt)))
         .returning();
       await recordAuditEventSafely(database, {
         actorUserId: userId,
@@ -88,6 +88,23 @@ export function createPostgresCardRepository({
       await recordAuditEventSafely(database, {
         actorUserId: userId,
         action: "finance.card.deleted",
+        outcome: card ? "success" : "denied",
+        entityType: "card",
+        entityId: id,
+      });
+      return Boolean(card);
+    },
+
+    async archive(id: string) {
+      const userId = await resolveUserId();
+      const [card] = await database
+        .update(cards)
+        .set({ archivedAt: new Date(), updatedAt: new Date() })
+        .where(and(eq(cards.id, id), eq(cards.userId, userId), isNull(cards.archivedAt)))
+        .returning({ id: cards.id });
+      await recordAuditEventSafely(database, {
+        actorUserId: userId,
+        action: "finance.card.archived",
         outcome: card ? "success" : "denied",
         entityType: "card",
         entityId: id,

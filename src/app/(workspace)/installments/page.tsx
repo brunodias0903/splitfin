@@ -1,21 +1,14 @@
-"use client";
+import { listCards } from "@/modules/cards/infrastructure/card-service";
+import { listInstallments } from "@/modules/installments/infrastructure/installment-service";
+import InstallmentsRouteClient from "./installments-route-client";
 
-import { useFinance } from "../_providers/finance-provider";
-import InstallmentsPage from "@/modules/installments/ui/installments-page";
-
-export default function InstallmentsRoute() {
-  const finance = useFinance();
+export default async function InstallmentsRoute() {
+  const [plans, cards] = await Promise.all([listInstallments(), listCards()]);
   return (
-    <InstallmentsPage
-      fixedExpenses={finance.installments}
-      cards={finance.cards}
-      editingId={finance.editingId}
-      onStartEdit={finance.startEditing}
-      onCancelEdit={finance.cancelEditing}
-      onAddFixedExpense={finance.addInstallment}
-      onUpdateFixedExpense={finance.editInstallment}
-      onDeleteFixedExpense={finance.deleteInstallment}
-      onPayInstallment={finance.payInstallment}
+    <InstallmentsRouteClient
+      key={`${plans.map(({ id, paidInstallments }) => `${id}:${paidInstallments}`).join(",")}:${cards.map(({ id }) => id).join(",")}`}
+      initialPlans={plans}
+      cards={cards}
     />
   );
 }

@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { getSession } from "@/modules/auth/infrastructure/session";
+import { listCards } from "@/modules/cards/infrastructure/card-service";
 import { CATEGORIES } from "@/modules/expenses/domain/expense";
 import { parsePageNumber, parseSortOrder } from "@/modules/expenses/application/persisted-expense";
 import { listExpensePage } from "@/modules/expenses/infrastructure/expense-service";
@@ -18,11 +19,14 @@ export default async function ExpensesRoute({ searchParams }: ExpensesRouteProps
     ? categoryValue
     : undefined;
   const order = parseSortOrder(params.order);
-  const expensePage = await listExpensePage({
-    page: parsePageNumber(params.page),
-    category,
-    order,
-  });
+  const [expensePage, cards] = await Promise.all([
+    listExpensePage({
+      page: parsePageNumber(params.page),
+      category,
+      order,
+    }),
+    listCards(),
+  ]);
 
   return (
     <ExpensesRouteClient
@@ -30,6 +34,7 @@ export default async function ExpensesRoute({ searchParams }: ExpensesRouteProps
       initialPage={expensePage}
       initialCategory={category ?? "All"}
       initialOrder={order}
+      cards={cards}
     />
   );
 }

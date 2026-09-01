@@ -56,7 +56,8 @@ substituído por operações de servidor sem alterar as regras de domínio.
 
 - existem mais arquivos e imports explícitos;
 - operações que cruzam módulos precisam ser coordenadas na raiz de composição;
-- até o M5, o provider cliente ainda mantém estado transitório da aplicação.
+- durante a migração do M5, adaptadores locais podem permanecer apenas como
+  fonte legada de importação; o estado financeiro ativo vem do servidor.
 
 ## Alternativas consideradas
 

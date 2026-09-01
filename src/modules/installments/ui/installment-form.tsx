@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Card } from "@/modules/cards/domain/card";
+import { toManausParts } from "@/modules/expenses/application/persisted-expense";
 import { CATEGORIES } from "@/modules/expenses/domain/expense";
 import type { InstallmentData, InstallmentPlan } from "../domain/installment";
 import { useLocale } from "@/shared/i18n";
@@ -7,10 +8,11 @@ import { Icon } from "@/shared/ui/icons";
 import { Button, Heading, Input, Label, NativeSelect, Text } from "@/shared/ui";
 
 interface FixedExpenseFormProps {
-  onSubmit: (data: InstallmentData) => void;
+  onSubmit: (data: InstallmentData) => Promise<boolean>;
   editingFixedExpense?: InstallmentPlan;
   onCancelEdit: () => void;
   cards: Card[];
+  pending?: boolean;
 }
 
 export default function FixedExpenseForm({
@@ -18,15 +20,17 @@ export default function FixedExpenseForm({
   editingFixedExpense,
   onCancelEdit,
   cards,
+  pending,
 }: FixedExpenseFormProps) {
   const { t, formatCurrency } = useLocale();
   const [description, setDescription] = useState("");
   const [installmentAmount, setInstallmentAmount] = useState("");
-  const [totalInstallments, setTotalInstallments] = useState("1");
+  const [totalInstallments, setTotalInstallments] = useState("2");
   const [paidInstallments, setPaidInstallments] = useState("0");
   const [category, setCategory] = useState<string>(CATEGORIES[0]);
-  const [startDate, setStartDate] = useState(new Date().toISOString().split("T")[0]);
+  const [startDate, setStartDate] = useState(() => toManausParts(new Date()).date);
   const [cardId, setCardId] = useState("");
+  const submittingRef = useRef(false);
 
   useEffect(() => {
     if (editingFixedExpense) {
@@ -45,19 +49,21 @@ export default function FixedExpenseForm({
   const resetForm = () => {
     setDescription("");
     setInstallmentAmount("");
-    setTotalInstallments("1");
+    setTotalInstallments("2");
     setPaidInstallments("0");
     setCategory(CATEGORIES[0]);
-    setStartDate(new Date().toISOString().split("T")[0]);
+    setStartDate(toManausParts(new Date()).date);
     setCardId("");
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const installment = parseFloat(installmentAmount);
     const installments = parseInt(totalInstallments, 10);
-    if (!description.trim() || !installmentAmount || !totalInstallments) return;
-    onSubmit({
+    if (submittingRef.current || !description.trim() || !installmentAmount || !totalInstallments)
+      return;
+    submittingRef.current = true;
+    const succeeded = await onSubmit({
       description: description.trim(),
       totalAmount: installment * installments,
       totalInstallments: installments,
@@ -66,10 +72,12 @@ export default function FixedExpenseForm({
       startDate,
       cardId: cardId || undefined,
     });
-    resetForm();
+    submittingRef.current = false;
+    if (succeeded) resetForm();
   };
 
   const isEditing = !!editingFixedExpense;
+  const hasGeneratedExpenses = (editingFixedExpense?.paidInstallments ?? 0) > 0;
   const installment = parseFloat(installmentAmount) || 0;
   const installments = parseInt(totalInstallments, 10) || 1;
   const paid = Math.min(parseInt(paidInstallments, 10) || 0, installments);
@@ -107,6 +115,7 @@ export default function FixedExpenseForm({
         value={installmentAmount}
         onChange={(e) => setInstallmentAmount(e.target.value)}
         required
+        disabled={hasGeneratedExpenses}
         aria-label={t.installmentAmount}
       />
       <div className="grid grid-cols-2 gap-3">
@@ -117,10 +126,11 @@ export default function FixedExpenseForm({
           <Input
             id="total-installments"
             type="number"
-            min="1"
+            min="2"
             value={totalInstallments}
             onChange={(e) => setTotalInstallments(e.target.value)}
             required
+            disabled={hasGeneratedExpenses}
           />
         </div>
         <div className="flex flex-col gap-1">
@@ -134,6 +144,7 @@ export default function FixedExpenseForm({
             value={paidInstallments}
             onChange={(e) => setPaidInstallments(e.target.value)}
             required
+            disabled={isEditing}
           />
         </div>
       </div>
@@ -181,11 +192,12 @@ export default function FixedExpenseForm({
         value={startDate}
         onChange={(e) => setStartDate(e.target.value)}
         required
+        disabled={hasGeneratedExpenses}
         aria-label={t.date}
       />
       <div className="flex gap-2">
-        <Button type="submit" className="flex-1">
-          {isEditing ? t.update : t.addInstallment}
+        <Button type="submit" className="flex-1" disabled={pending}>
+          {pending ? t.saving : isEditing ? t.update : t.addInstallment}
         </Button>
         {isEditing && (
           <Button

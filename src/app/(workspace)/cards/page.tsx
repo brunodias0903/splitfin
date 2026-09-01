@@ -1,9 +1,7 @@
-"use client";
+import { listCards } from "@/modules/cards/infrastructure/card-service";
+import CardsRouteClient from "./cards-route-client";
 
-import { useFinance } from "../_providers/finance-provider";
-import CardsPage from "@/modules/cards/ui/cards-page";
-
-export default function CardsRoute() {
-  const { cards, addCard, removeCard } = useFinance();
-  return <CardsPage cards={cards} onAddCard={addCard} onRemoveCard={removeCard} />;
+export default async function CardsRoute() {
+  const cards = await listCards();
+  return <CardsRouteClient key={cards.map(({ id }) => id).join(",")} initialCards={cards} />;
 }

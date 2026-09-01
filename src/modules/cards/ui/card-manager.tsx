@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { CARD_TYPES, type Card } from "../domain/card";
+import { useRef, useState } from "react";
+import { CARD_TYPES, type Card, type CardData } from "../domain/card";
 import { useLocale } from "@/shared/i18n";
 import { Icon } from "@/shared/ui/icons";
 import {
@@ -19,25 +19,64 @@ import {
 
 interface CardManagerProps {
   cards: Card[];
-  onAddCard: (name: string, last4: string, type: string) => void;
-  onRemoveCard: (id: string) => void;
+  onAddCard: (data: CardData) => Promise<boolean>;
+  onUpdateCard: (id: string, data: CardData) => Promise<boolean>;
+  onRemoveCard: (id: string) => Promise<void>;
+  pending?: boolean;
 }
 
-export default function CardManager({ cards, onAddCard, onRemoveCard }: CardManagerProps) {
+export default function CardManager({
+  cards,
+  onAddCard,
+  onUpdateCard,
+  onRemoveCard,
+  pending,
+}: CardManagerProps) {
   const { t } = useLocale();
   const [showForm, setShowForm] = useState(false);
   const [name, setName] = useState("");
   const [last4, setLast4] = useState("");
   const [cardType, setCardType] = useState<string>(CARD_TYPES[2]);
+  const [closingDay, setClosingDay] = useState("5");
+  const [dueDay, setDueDay] = useState("12");
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const submittingRef = useRef(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!name.trim() || last4.length !== 4) return;
-    onAddCard(name.trim(), last4, cardType);
+  const resetForm = () => {
     setName("");
     setLast4("");
     setCardType(CARD_TYPES[2]);
+    setClosingDay("5");
+    setDueDay("12");
+    setEditingId(null);
     setShowForm(false);
+  };
+
+  const startEditing = (card: Card) => {
+    setName(card.name);
+    setLast4(card.last4);
+    setCardType(card.type);
+    setClosingDay(String(card.closingDay));
+    setDueDay(String(card.dueDay));
+    setEditingId(card.id);
+    setShowForm(true);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (submittingRef.current || !name.trim() || last4.length !== 4) return;
+    submittingRef.current = true;
+    const data: CardData = {
+      name: name.trim(),
+      last4,
+      type: cardType as CardData["type"],
+      closingDay: Number(closingDay),
+      dueDay: Number(dueDay),
+    };
+    const succeeded = editingId ? await onUpdateCard(editingId, data) : await onAddCard(data);
+    submittingRef.current = false;
+    if (!succeeded) return;
+    resetForm();
   };
 
   const typeBadge = (type: string) => {
@@ -81,7 +120,7 @@ export default function CardManager({ cards, onAddCard, onRemoveCard }: CardMana
       {showForm && (
         <form
           onSubmit={handleSubmit}
-          className="mb-7 grid gap-3 rounded-2xl border border-primary-muted bg-primary-soft/40 p-4 sm:grid-cols-[minmax(0,1fr)_150px_minmax(160px,.7fr)] sm:p-5"
+          className="mb-7 grid gap-3 rounded-2xl border border-primary-muted bg-primary-soft/40 p-4 sm:grid-cols-2 sm:p-5 lg:grid-cols-5"
         >
           <Input
             type="text"
@@ -110,13 +149,31 @@ export default function CardManager({ cards, onAddCard, onRemoveCard }: CardMana
               </option>
             ))}
           </NativeSelect>
-          <div className="flex gap-2 sm:col-span-3 sm:justify-end">
-            <Button type="submit" className="flex-1 sm:flex-none">
-              {t.addCard}
+          <Input
+            type="number"
+            min="1"
+            max="31"
+            value={closingDay}
+            onChange={(event) => setClosingDay(event.target.value)}
+            aria-label={t.cardClosingDay}
+            placeholder={t.cardClosingDay}
+          />
+          <Input
+            type="number"
+            min="1"
+            max="31"
+            value={dueDay}
+            onChange={(event) => setDueDay(event.target.value)}
+            aria-label={t.cardDueDay}
+            placeholder={t.cardDueDay}
+          />
+          <div className="flex gap-2 sm:col-span-2 sm:justify-end lg:col-span-5">
+            <Button type="submit" className="flex-1 sm:flex-none" disabled={pending}>
+              {pending ? t.saving : editingId ? t.update : t.addCard}
             </Button>
             <Button
               type="button"
-              onClick={() => setShowForm(false)}
+              onClick={resetForm}
               variant="secondary"
               className="flex-1 sm:flex-none"
             >
@@ -156,6 +213,15 @@ export default function CardManager({ cards, onAddCard, onRemoveCard }: CardMana
                     {t.cardTypes[card.type] ?? card.type}
                   </Badge>
                   <IconButton
+                    onClick={() => startEditing(card)}
+                    label={t.edit}
+                    variant="ghost"
+                    size="icon-sm"
+                    className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-on-brand/45 opacity-100 transition-all hover:bg-surface/10 hover:text-on-brand sm:opacity-0 sm:group-hover:opacity-100"
+                  >
+                    <Icon name="edit" size={15} />
+                  </IconButton>
+                  <IconButton
                     onClick={() => onRemoveCard(card.id)}
                     label={t.delete}
                     variant="ghost"
@@ -177,6 +243,9 @@ export default function CardManager({ cards, onAddCard, onRemoveCard }: CardMana
                     </p>
                     <p className="mt-0.5 max-w-44 truncate text-sm font-semibold text-on-brand/90">
                       {card.name}
+                    </p>
+                    <p className="mt-1 text-[10px] text-on-brand/55">
+                      {t.cardCloses} {card.closingDay} · {t.cardDue} {card.dueDay}
                     </p>
                   </div>
                   <Icon name="wallet" size={22} className="text-on-brand/35" />

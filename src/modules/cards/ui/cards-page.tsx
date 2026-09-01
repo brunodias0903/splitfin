@@ -1,15 +1,25 @@
-import type { Card } from "../domain/card";
+import type { Card, CardData } from "../domain/card";
 import CardManager from "./card-manager";
 import { useLocale } from "@/shared/i18n";
 import { Heading, Surface, Text } from "@/shared/ui";
 
 interface CardsPageProps {
   cards: Card[];
-  onAddCard: (name: string, last4: string, type: string) => void;
-  onRemoveCard: (id: string) => void;
+  onAddCard: (data: CardData) => Promise<boolean>;
+  onUpdateCard: (id: string, data: CardData) => Promise<boolean>;
+  onRemoveCard: (id: string) => Promise<void>;
+  pending?: boolean;
+  error?: string | null;
 }
 
-export default function CardsPage({ cards, onAddCard, onRemoveCard }: CardsPageProps) {
+export default function CardsPage({
+  cards,
+  onAddCard,
+  onUpdateCard,
+  onRemoveCard,
+  pending,
+  error,
+}: CardsPageProps) {
   const { t } = useLocale();
 
   return (
@@ -27,7 +37,18 @@ export default function CardsPage({ cards, onAddCard, onRemoveCard }: CardsPageP
       </div>
 
       <Surface className="ds-section-padding">
-        <CardManager cards={cards} onAddCard={onAddCard} onRemoveCard={onRemoveCard} />
+        {error && (
+          <p role="alert" className="mb-4 rounded-xl bg-danger-soft p-3 text-sm text-danger">
+            {error}
+          </p>
+        )}
+        <CardManager
+          cards={cards}
+          onAddCard={onAddCard}
+          onUpdateCard={onUpdateCard}
+          onRemoveCard={onRemoveCard}
+          pending={pending}
+        />
       </Surface>
     </div>
   );

@@ -223,6 +223,7 @@ export const installmentPlans = pgTable(
     totalInstallments: integer("total_installments").notNull(),
     paidInstallments: integer("paid_installments").default(0).notNull(),
     startsOn: date("starts_on", { mode: "string" }).notNull(),
+    archivedAt: timestamp("archived_at", { withTimezone: true }),
     ...timestamps,
   },
   (table) => [
