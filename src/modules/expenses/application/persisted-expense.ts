@@ -65,6 +65,7 @@ export function parseExpenseInput(value: unknown): ExpenseData {
   const description = typeof value.description === "string" ? value.description.trim() : "";
   const amount = typeof value.amount === "number" ? value.amount : Number.NaN;
   const time = value.time === undefined || value.time === "" ? undefined : value.time;
+  const cardId = value.cardId === undefined || value.cardId === "" ? undefined : value.cardId;
 
   if (description.length < 2 || description.length > 160) {
     throw new InvalidExpenseInputError("Description must contain between 2 and 160 characters.");
@@ -81,6 +82,13 @@ export function parseExpenseInput(value: unknown): ExpenseData {
   if (!isDate(value.date)) throw new InvalidExpenseInputError("Invalid expense date.");
   if (time !== undefined && !isTime(time))
     throw new InvalidExpenseInputError("Invalid expense time.");
+  if (
+    cardId !== undefined &&
+    (typeof cardId !== "string" ||
+      !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(cardId))
+  ) {
+    throw new InvalidExpenseInputError("Invalid card identifier.");
+  }
 
   return {
     description,
@@ -89,6 +97,7 @@ export function parseExpenseInput(value: unknown): ExpenseData {
     paymentType: value.paymentType,
     date: value.date,
     time,
+    cardId,
   };
 }
 

@@ -13,14 +13,14 @@ import {
 } from "./persisted-expense";
 
 describe("persisted expense boundary", () => {
-  it("normalizes valid input and excludes client-controlled references", () => {
+  it("normalizes valid input and accepts an owned-reference candidate", () => {
     expect(
       parseExpenseInput({
         description: "  Mercado  ",
         amount: 12.345,
         category: "Food",
         paymentType: "credit",
-        cardId: "client-controlled-value",
+        cardId: "12345678-1234-4123-8123-123456789abc",
         date: "2026-08-31",
         time: "18:45",
       }),
@@ -31,6 +31,7 @@ describe("persisted expense boundary", () => {
       paymentType: "credit",
       date: "2026-08-31",
       time: "18:45",
+      cardId: "12345678-1234-4123-8123-123456789abc",
     });
   });
 

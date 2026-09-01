@@ -52,7 +52,7 @@ async function valuesFromInput(data: ExpenseData) {
       paymentType: paymentTypeToDatabase(data.paymentType),
       occurredAt: expenseDateTimeToDatabase(data.date, data.time),
       categoryId: category.id,
-      cardId: null,
+      cardId: data.cardId ?? null,
     },
     expenseRepository,
   };

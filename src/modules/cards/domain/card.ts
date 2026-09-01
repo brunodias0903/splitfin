@@ -7,7 +7,11 @@ export interface Card {
   name: string;
   last4: string;
   type: CardType;
+  closingDay: number;
+  dueDay: number;
 }
+
+export type CardData = Omit<Card, "id">;
 
 export function isCard(data: unknown): data is Card {
   if (typeof data !== "object" || data === null) return false;
@@ -16,6 +20,12 @@ export function isCard(data: unknown): data is Card {
     typeof value.id === "string" &&
     typeof value.name === "string" &&
     /^\d{4}$/.test(String(value.last4)) &&
-    CARD_TYPES.includes(value.type as CardType)
+    CARD_TYPES.includes(value.type as CardType) &&
+    Number.isInteger(value.closingDay) &&
+    Number(value.closingDay) >= 1 &&
+    Number(value.closingDay) <= 31 &&
+    Number.isInteger(value.dueDay) &&
+    Number(value.dueDay) >= 1 &&
+    Number(value.dueDay) <= 31
   );
 }

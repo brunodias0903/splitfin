@@ -20,6 +20,8 @@ export interface InstallmentData {
   cardId?: string;
 }
 
+export type InstallmentUpdateData = Omit<InstallmentData, "paidInstallments">;
+
 export function isInstallmentPlan(data: unknown): data is InstallmentPlan {
   if (typeof data !== "object" || data === null) return false;
   const value = data as Record<string, unknown>;
