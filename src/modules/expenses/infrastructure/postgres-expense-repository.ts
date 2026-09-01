@@ -1,4 +1,4 @@
-import { and, desc, eq, isNull, or } from "drizzle-orm";
+import { and, asc, count, desc, eq, isNull, or, sum } from "drizzle-orm";
 
 import { accounts, cards, categories, expenses, installmentPlans } from "@/shared/db/schema";
 import { recordAuditEventSafely } from "@/shared/security/audit";
@@ -13,6 +13,13 @@ type ExpenseValues = Omit<
   "id" | "userId" | "createdAt" | "updatedAt"
 >;
 type ExpensePatch = Partial<ExpenseValues>;
+
+export interface ExpensePageQuery {
+  page: number;
+  pageSize: number;
+  categorySlug?: string;
+  order: "newest" | "oldest";
+}
 
 export function createPostgresExpenseRepository({
   database,
@@ -74,6 +81,62 @@ export function createPostgresExpenseRepository({
         .from(expenses)
         .where(eq(expenses.userId, userId))
         .orderBy(desc(expenses.occurredAt));
+    },
+
+    async listPage({ page, pageSize, categorySlug, order }: ExpensePageQuery) {
+      const userId = await resolveUserId();
+      const filters = [eq(expenses.userId, userId)];
+      if (categorySlug) filters.push(eq(categories.slug, categorySlug));
+      const where = and(...filters);
+
+      const [items, [summary]] = await Promise.all([
+        database
+          .select({
+            id: expenses.id,
+            description: expenses.description,
+            amountCents: expenses.amountCents,
+            paymentType: expenses.paymentType,
+            occurredAt: expenses.occurredAt,
+            cardId: expenses.cardId,
+            categorySlug: categories.slug,
+          })
+          .from(expenses)
+          .leftJoin(categories, eq(expenses.categoryId, categories.id))
+          .where(where)
+          .orderBy(order === "oldest" ? asc(expenses.occurredAt) : desc(expenses.occurredAt))
+          .limit(pageSize)
+          .offset((page - 1) * pageSize),
+        database
+          .select({
+            totalItems: count(),
+            totalAmountCents: sum(expenses.amountCents),
+          })
+          .from(expenses)
+          .leftJoin(categories, eq(expenses.categoryId, categories.id))
+          .where(where),
+      ]);
+
+      return {
+        items,
+        totalItems: Number(summary?.totalItems ?? 0),
+        totalAmountCents: Number(summary?.totalAmountCents ?? 0),
+      };
+    },
+
+    async findCategoryBySlug(slug: string) {
+      const userId = await resolveUserId();
+      const [category] = await database
+        .select({ id: categories.id })
+        .from(categories)
+        .where(
+          and(
+            eq(categories.slug, slug),
+            or(eq(categories.userId, userId), isNull(categories.userId)),
+          ),
+        )
+        .orderBy(desc(categories.userId))
+        .limit(1);
+      return category ?? null;
     },
 
     async findById(id: string) {
