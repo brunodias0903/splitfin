@@ -1,4 +1,4 @@
-import { expect, navigateTo, openApp, test } from "./fixtures";
+import { expect, navigateTo, openApp, signInExistingAccount, test } from "./fixtures";
 
 test.describe("experiência principal", () => {
   test.beforeEach(async ({ page }) => {
@@ -40,7 +40,10 @@ test.describe("experiência principal", () => {
     expect(hydrationErrors).toEqual([]);
   });
 
-  test("registra e exibe uma despesa", async ({ page }) => {
+  test("persiste, edita e exclui uma despesa em navegadores diferentes", async ({
+    page,
+    browser,
+  }) => {
     await navigateTo(page, "Despesas");
     await page.getByLabel("Descrição", { exact: true }).fill("Supermercado");
     await page.getByLabel("Valor", { exact: true }).fill("184.90");
@@ -49,6 +52,28 @@ test.describe("experiência principal", () => {
     await expect(page.getByText("Supermercado", { exact: true })).toBeVisible();
     await expect(page.getByRole("listitem").getByText("R$ 184,90", { exact: true })).toBeVisible();
     await expect(page.getByText(/1 lançamento/)).toBeVisible();
+
+    const secondContext = await browser.newContext({ locale: "pt-BR" });
+    const secondPage = await secondContext.newPage();
+    await signInExistingAccount(secondPage);
+    await secondPage.goto("/expenses");
+    const persistedExpense = secondPage.getByRole("listitem").filter({ hasText: "Supermercado" });
+    await expect(persistedExpense).toHaveCount(1);
+    await expect(persistedExpense.getByText("Supermercado", { exact: true })).toBeVisible();
+    await secondContext.close();
+
+    await page.getByRole("listitem").getByRole("button", { name: "Editar" }).click();
+    await page.getByLabel("Descrição", { exact: true }).fill("Mercado mensal");
+    await page.getByRole("button", { name: "Atualizar", exact: true }).click();
+    await expect(page.getByText("Mercado mensal", { exact: true })).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Adicionar Despesa", exact: true }),
+    ).toBeVisible();
+
+    await page.reload();
+    await expect(page.getByText("Mercado mensal", { exact: true })).toBeVisible();
+    await page.getByRole("listitem").getByRole("button", { name: "Excluir" }).click();
+    await expect(page.getByText("Mercado mensal", { exact: true })).not.toBeVisible();
   });
 
   test("cadastra e exibe um cartão", async ({ page }) => {

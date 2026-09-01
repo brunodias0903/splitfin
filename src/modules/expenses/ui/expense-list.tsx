@@ -1,6 +1,5 @@
-import { useState } from "react";
 import type { Card } from "@/modules/cards/domain/card";
-import type { Expense } from "../domain/expense";
+import type { Expense, ExpenseSortOrder } from "../domain/expense";
 import { CATEGORIES } from "../domain/expense";
 import { useLocale } from "@/shared/i18n";
 import { Icon } from "@/shared/ui/icons";
@@ -17,8 +16,6 @@ import {
   Text,
 } from "@/shared/ui";
 
-type SortOrder = "newest" | "oldest";
-
 interface ExpenseListProps {
   expenses: Expense[];
   allExpenses: Expense[];
@@ -27,6 +24,14 @@ interface ExpenseListProps {
   filterCategory: string;
   onFilterChange: (cat: string) => void;
   cards: Card[];
+  sortOrder: ExpenseSortOrder;
+  onSortChange: (order: ExpenseSortOrder) => void;
+  page: number;
+  totalPages: number;
+  totalItems: number;
+  totalAmount: number;
+  averageAmount: number;
+  onPageChange: (page: number) => void;
 }
 
 const CATEGORY_STYLES: Record<string, string> = {
@@ -49,18 +54,6 @@ const CATEGORY_DOTS: Record<string, string> = {
   Subscription: "bg-primary-highlight",
   Other: "bg-muted-foreground",
 };
-
-function getSortKey(expense: Expense): string {
-  return expense.time ? `${expense.date}T${expense.time}` : `${expense.date}T00:00`;
-}
-
-function sortExpenses(list: Expense[], order: SortOrder): Expense[] {
-  return [...list].sort((a, b) => {
-    const first = getSortKey(a);
-    const second = getSortKey(b);
-    return order === "newest" ? second.localeCompare(first) : first.localeCompare(second);
-  });
-}
 
 function downloadCSV(expenses: Expense[]) {
   const header = "Description,Amount,Payment,Category,Date,Time";
@@ -85,13 +78,16 @@ export default function ExpenseList({
   filterCategory,
   onFilterChange,
   cards,
+  sortOrder,
+  onSortChange,
+  page,
+  totalPages,
+  totalItems,
+  totalAmount,
+  averageAmount,
+  onPageChange,
 }: ExpenseListProps) {
   const { t, formatCurrency, formatDate } = useLocale();
-  const [sortOrder, setSortOrder] = useState<SortOrder>("newest");
-
-  const sorted = sortExpenses(expenses, sortOrder);
-  const total = expenses.reduce((sum, expense) => sum + expense.amount, 0);
-  const average = expenses.length ? total / expenses.length : 0;
   const cardMap = new Map(cards.map((card) => [card.id, card]));
   const categoryTotals = CATEGORIES.map((category) => ({
     category,
@@ -147,7 +143,7 @@ export default function ExpenseList({
             {t.total}
           </p>
           <p className="mt-1 truncate text-sm font-bold text-strong sm:text-base">
-            {formatCurrency(total)}
+            {formatCurrency(totalAmount)}
           </p>
         </div>
         <div className="px-4 py-4 sm:px-6">
@@ -155,14 +151,14 @@ export default function ExpenseList({
             {t.average}
           </p>
           <p className="mt-1 truncate text-sm font-bold text-strong sm:text-base">
-            {formatCurrency(average)}
+            {formatCurrency(averageAmount)}
           </p>
         </div>
         <div className="px-4 py-4 sm:px-6">
           <p className="text-[10px] font-bold uppercase tracking-wider text-subtle-foreground">
             {t.records}
           </p>
-          <p className="mt-1 text-sm font-bold text-strong sm:text-base">{sorted.length}</p>
+          <p className="mt-1 text-sm font-bold text-strong sm:text-base">{totalItems}</p>
         </div>
       </div>
 
@@ -171,7 +167,7 @@ export default function ExpenseList({
           {(["newest", "oldest"] as const).map((order) => (
             <Button
               key={order}
-              onClick={() => setSortOrder(order)}
+              onClick={() => onSortChange(order)}
               variant={sortOrder === order ? "outline" : "ghost"}
               size="sm"
               className={
@@ -183,7 +179,7 @@ export default function ExpenseList({
           ))}
         </div>
         <span className="text-xs font-semibold text-subtle-foreground">
-          {sorted.length} {t.entries}
+          {totalItems} {t.entries}
         </span>
       </div>
 
@@ -202,7 +198,7 @@ export default function ExpenseList({
         </div>
       )}
 
-      {sorted.length === 0 ? (
+      {expenses.length === 0 ? (
         <Empty className="py-14">
           <EmptyHeader>
             <EmptyMedia variant="icon" className="size-12 rounded-2xl text-subtle-foreground">
@@ -223,7 +219,7 @@ export default function ExpenseList({
             <span className="text-right">{t.actions}</span>
           </div>
           <ul className="list-none px-4 sm:px-6">
-            {sorted.map((expense) => {
+            {expenses.map((expense) => {
               const card = expense.cardId ? cardMap.get(expense.cardId) : undefined;
               const categoryLabel = t.categories[expense.category];
               return (
@@ -290,6 +286,31 @@ export default function ExpenseList({
               );
             })}
           </ul>
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between border-t border-border-subtle px-5 py-4 sm:px-6">
+              <Text variant="small" tone="muted">
+                {t.page} {page} {t.pageOf} {totalPages}
+              </Text>
+              <div className="flex gap-2">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  disabled={page <= 1}
+                  onClick={() => onPageChange(page - 1)}
+                >
+                  {t.previous}
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  disabled={page >= totalPages}
+                  onClick={() => onPageChange(page + 1)}
+                >
+                  {t.next}
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </section>

@@ -31,6 +31,11 @@ alterações de tipo seguem três entregas:
 2. **Migrar:** preencher e validar os dados existentes.
 3. **Contrair:** remover a estrutura antiga apenas quando nenhum código a usar.
 
+A migration `0003` adiciona `boleto` ao enum de pagamento e as categorias
+canônicas do sistema usadas pela interface de despesas. Ela é aditiva; o
+rollback de aplicação pode manter esses valores no banco, pois o PostgreSQL não
+oferece remoção segura de um valor de enum sem reconstrução do tipo.
+
 ## Backup
 
 Defina `DATABASE_URL` no ambiente e crie um dump em formato customizado:

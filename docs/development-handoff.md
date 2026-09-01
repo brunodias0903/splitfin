@@ -4,7 +4,7 @@ Este documento é a fonte operacional para retomar o Splitfin em outra máquina
 ou trabalhar em mais de uma frente. O [roadmap](roadmap.md) registra os marcos;
 este guia detalha ordem, dependências, entregas e critérios de aceite.
 
-> Última consolidação: 31 de agosto de 2026, após o merge da PR #19.
+> Última consolidação: 1º de setembro de 2026, durante a PR 5.1 de persistência de despesas.
 
 ## Estado atual
 
@@ -27,12 +27,15 @@ este guia detalha ordem, dependências, entregas e critérios de aceite.
 - testes horizontais com dois usuários e validação de referências relacionadas.
 - rate limiting persistente, auditoria de segurança, retenção e headers HTTP;
 - respostas de autenticação padronizadas e proteção de origem testada.
+- despesas persistidas no PostgreSQL por Server Actions com validação no servidor;
+- listagem de despesas com filtro, ordenação, paginação e agregados calculados no banco;
+- atualização otimista com rollback e E2E cobrindo outro navegador e isolamento por usuário.
 
 ### Estado transitório conhecido
 
-- a interface ainda persiste os dados financeiros em `localStorage`;
-- PostgreSQL está preparado, mas ainda não é consumido pela aplicação;
-- os repositórios do servidor estão isolados, mas a interface ainda não os consome;
+- cartões e parcelas ainda são persistidos em `localStorage`;
+- despesas já usam somente o servidor, mas a associação com cartão permanece desabilitada até a PR 5.2;
+- despesas geradas pelo pagamento de parcelas serão conectadas ao servidor junto da PR 5.2;
 - não há ambiente de staging ou produção ativo;
 - Supabase e Vercel ainda aparecem como GitHub Apps da conta. O Splitfin não
   depende deles; qualquer remoção deve considerar os outros repositórios da
@@ -119,14 +122,16 @@ registrar secrets ou dados financeiros completos.
 
 #### PR 5.1 — Despesas no servidor
 
+Status: implementada na branch `feat/expense-persistence`, aguardando integração.
+
 Branch sugerida: `feat/expense-persistence`
 
-- implementar repositório PostgreSQL e casos de uso de despesas;
-- criar Server Actions ou Route Handlers finos, conforme a fronteira escolhida;
-- validar payloads no servidor e manter cálculos no domínio;
-- substituir gravações de despesas em `localStorage`;
-- tratar loading, falha, retry e atualização otimista com rollback;
-- cobrir paginação, filtros e ordenação no banco.
+- [x] implementar repositório PostgreSQL e casos de uso de despesas;
+- [x] criar Server Actions finas e autenticadas;
+- [x] validar payloads no servidor e manter mapeamentos no domínio;
+- [x] substituir gravações de despesas em `localStorage`;
+- [x] tratar loading, falha, retry e atualização otimista com rollback;
+- [x] cobrir paginação, filtros e ordenação no banco.
 
 Aceite: despesas sobrevivem a outro navegador e permanecem isoladas por usuário.
 

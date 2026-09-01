@@ -1,15 +1,17 @@
-import { useState, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Card } from "@/modules/cards/domain/card";
+import { toManausParts } from "../application/persisted-expense";
 import { CATEGORIES, PAYMENT_TYPES, type Expense, type ExpenseData } from "../domain/expense";
 import { useLocale } from "@/shared/i18n";
 import { Icon } from "@/shared/ui/icons";
 import { Button, Heading, Input, NativeSelect, Text } from "@/shared/ui";
 
 interface ExpenseFormProps {
-  onSubmit: (data: ExpenseData) => void;
+  onSubmit: (data: ExpenseData) => Promise<boolean>;
   editingExpense?: Expense;
   onCancelEdit: () => void;
   cards: Card[];
+  pending?: boolean;
 }
 
 export default function ExpenseForm({
@@ -17,15 +19,16 @@ export default function ExpenseForm({
   editingExpense,
   onCancelEdit,
   cards,
+  pending = false,
 }: ExpenseFormProps) {
   const { t } = useLocale();
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
   const [paymentType, setPaymentType] = useState<string>(PAYMENT_TYPES[0]);
-  const [cardId, setCardId] = useState("");
   const [category, setCategory] = useState<string>(CATEGORIES[0]);
-  const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
+  const [date, setDate] = useState(() => toManausParts(new Date()).date);
   const [time, setTime] = useState("");
+  const submittingRef = useRef(false);
 
   const isCardPayment = paymentType === "credit" || paymentType === "debit";
 
@@ -34,7 +37,6 @@ export default function ExpenseForm({
       setDescription(editingExpense.description);
       setAmount(String(editingExpense.amount));
       setPaymentType(editingExpense.paymentType ?? PAYMENT_TYPES[0]);
-      setCardId(editingExpense.cardId ?? "");
       setCategory(editingExpense.category);
       setDate(editingExpense.date);
       setTime(editingExpense.time ?? "");
@@ -45,25 +47,28 @@ export default function ExpenseForm({
     setDescription("");
     setAmount("");
     setPaymentType(PAYMENT_TYPES[0]);
-    setCardId("");
     setCategory(CATEGORIES[0]);
-    setDate(new Date().toISOString().split("T")[0]);
+    setDate(toManausParts(new Date()).date);
     setTime("");
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!description.trim() || !amount) return;
-    onSubmit({
-      description: description.trim(),
-      amount: parseFloat(amount),
-      paymentType,
-      cardId: isCardPayment && cardId ? cardId : undefined,
-      category,
-      date,
-      time: time || undefined,
-    });
-    resetForm();
+    if (submittingRef.current || !description.trim() || !amount) return;
+    submittingRef.current = true;
+    try {
+      const succeeded = await onSubmit({
+        description: description.trim(),
+        amount: parseFloat(amount),
+        paymentType,
+        category,
+        date,
+        time: time || undefined,
+      });
+      if (succeeded) resetForm();
+    } finally {
+      submittingRef.current = false;
+    }
   };
 
   const isEditing = !!editingExpense;
@@ -105,7 +110,6 @@ export default function ExpenseForm({
         value={paymentType}
         onChange={(e) => {
           setPaymentType(e.target.value);
-          setCardId("");
         }}
         aria-label={t.paymentType}
         className="w-full"
@@ -116,21 +120,15 @@ export default function ExpenseForm({
           </option>
         ))}
       </NativeSelect>
-      {isCardPayment && (
+      {isCardPayment && cards.length > 0 && (
         <NativeSelect
-          value={cardId}
-          onChange={(e) => setCardId(e.target.value)}
+          value=""
+          onChange={() => undefined}
           aria-label={t.cards}
           className="w-full"
+          disabled
         >
-          <option value="">{t.noCard}</option>
-          {cards
-            .filter((c) => c.type === "multiple" || c.type === paymentType)
-            .map((card) => (
-              <option key={card.id} value={card.id}>
-                {card.name} ••{card.last4} ({t.cardTypes[card.type]})
-              </option>
-            ))}
+          <option value="">{t.cardPersistencePending}</option>
         </NativeSelect>
       )}
       <NativeSelect
@@ -161,8 +159,8 @@ export default function ExpenseForm({
         />
       </div>
       <div className="flex gap-2">
-        <Button type="submit" className="flex-1">
-          {isEditing ? t.update : t.addExpense}
+        <Button type="submit" className="flex-1" disabled={pending}>
+          {pending ? t.saving : isEditing ? t.update : t.addExpense}
         </Button>
         {isEditing && (
           <Button

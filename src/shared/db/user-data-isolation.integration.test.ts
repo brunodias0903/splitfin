@@ -203,6 +203,45 @@ describe("PostgreSQL user data isolation", () => {
     });
   });
 
+  it("paginates, filters, orders, and aggregates expenses inside the user scope", async () => {
+    await Promise.all(
+      [
+        ["Older", 1_000, "2026-08-01T12:00:00.000Z"],
+        ["Middle", 2_000, "2026-08-15T12:00:00.000Z"],
+        ["Newer", 3_000, "2026-08-31T12:00:00.000Z"],
+      ].map(([description, amountCents, occurredAt]) =>
+        alice.expenses.create({
+          categoryId: systemCategoryId,
+          description: description as string,
+          amountCents: amountCents as number,
+          paymentType: "boleto",
+          occurredAt: new Date(occurredAt as string),
+        }),
+      ),
+    );
+
+    const firstPage = await alice.expenses.listPage({
+      page: 1,
+      pageSize: 2,
+      categorySlug: "isolation-system-category",
+      order: "oldest",
+    });
+    const secondPage = await alice.expenses.listPage({
+      page: 2,
+      pageSize: 2,
+      categorySlug: "isolation-system-category",
+      order: "oldest",
+    });
+
+    expect(firstPage.items.map(({ description }) => description)).toEqual(["Older", "Middle"]);
+    expect(secondPage.items.map(({ description }) => description)).toEqual(["Newer"]);
+    expect(firstPage.totalItems).toBe(3);
+    expect(firstPage.totalAmountCents).toBe(6_000);
+    expect(
+      firstPage.items.every(({ categorySlug }) => categorySlug === "isolation-system-category"),
+    ).toBe(true);
+  });
+
   it("audits successful and denied financial mutations without financial payloads", async () => {
     const events = await database
       .select()

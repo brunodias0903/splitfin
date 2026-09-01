@@ -36,6 +36,7 @@ export const paymentType = pgEnum("payment_type", [
   "debit_card",
   "credit_card",
   "bank_transfer",
+  "boleto",
   "pix",
   "other",
 ]);

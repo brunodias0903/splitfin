@@ -35,6 +35,18 @@ export interface ExpenseData {
   time?: string;
 }
 
+export type ExpenseSortOrder = "newest" | "oldest";
+
+export interface ExpensePage {
+  items: Expense[];
+  page: number;
+  pageSize: number;
+  totalItems: number;
+  totalPages: number;
+  totalAmount: number;
+  averageAmount: number;
+}
+
 export function isExpense(data: unknown): data is Expense {
   if (typeof data !== "object" || data === null) return false;
   const value = data as Record<string, unknown>;

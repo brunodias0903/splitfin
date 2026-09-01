@@ -1,9 +1,11 @@
-"use client";
+import { redirect } from "next/navigation";
 
-import { useFinance } from "../_providers/finance-provider";
-import DashboardPage from "@/modules/dashboard/ui/dashboard-page";
+import { getSession } from "@/modules/auth/infrastructure/session";
+import { listLatestExpenses } from "@/modules/expenses/infrastructure/expense-service";
+import DashboardRouteClient from "./dashboard-route-client";
 
-export default function DashboardRoute() {
-  const { expenses, installments, cards } = useFinance();
-  return <DashboardPage expenses={expenses} fixedExpenses={installments} cards={cards} />;
+export default async function DashboardRoute() {
+  if (!(await getSession())) redirect("/login");
+  const expenses = await listLatestExpenses();
+  return <DashboardRouteClient expenses={expenses} />;
 }

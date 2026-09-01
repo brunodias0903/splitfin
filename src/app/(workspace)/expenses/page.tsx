@@ -1,22 +1,35 @@
-"use client";
+import { redirect } from "next/navigation";
 
-import { useFinance } from "../_providers/finance-provider";
-import ExpensesPage from "@/modules/expenses/ui/expenses-page";
+import { getSession } from "@/modules/auth/infrastructure/session";
+import { CATEGORIES } from "@/modules/expenses/domain/expense";
+import { parsePageNumber, parseSortOrder } from "@/modules/expenses/application/persisted-expense";
+import { listExpensePage } from "@/modules/expenses/infrastructure/expense-service";
+import ExpensesRouteClient from "./expenses-route-client";
 
-export default function ExpensesRoute() {
-  const finance = useFinance();
+interface ExpensesRouteProps {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}
+
+export default async function ExpensesRoute({ searchParams }: ExpensesRouteProps) {
+  if (!(await getSession())) redirect("/login");
+  const params = await searchParams;
+  const categoryValue = typeof params.category === "string" ? params.category : undefined;
+  const category = (CATEGORIES as readonly string[]).includes(categoryValue ?? "")
+    ? categoryValue
+    : undefined;
+  const order = parseSortOrder(params.order);
+  const expensePage = await listExpensePage({
+    page: parsePageNumber(params.page),
+    category,
+    order,
+  });
+
   return (
-    <ExpensesPage
-      expenses={finance.expenses}
-      cards={finance.cards}
-      filterCategory={finance.filterCategory}
-      onFilterChange={finance.setFilterCategory}
-      onAddExpense={finance.addExpense}
-      onUpdateExpense={finance.editExpense}
-      onDeleteExpense={finance.deleteExpense}
-      editingId={finance.editingId}
-      onStartEdit={finance.startEditing}
-      onCancelEdit={finance.cancelEditing}
+    <ExpensesRouteClient
+      key={`${expensePage.page}:${expensePage.totalItems}:${expensePage.items.map((item) => item.id).join(",")}`}
+      initialPage={expensePage}
+      initialCategory={category ?? "All"}
+      initialOrder={order}
     />
   );
 }
