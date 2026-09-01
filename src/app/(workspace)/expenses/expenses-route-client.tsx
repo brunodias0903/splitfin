@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import ExpensesPage from "@/modules/expenses/ui/expenses-page";
+import type { Card } from "@/modules/cards/domain/card";
 import type {
   Expense,
   ExpenseData,
@@ -11,7 +12,6 @@ import type {
   ExpenseSortOrder,
 } from "@/modules/expenses/domain/expense";
 import { useLocale } from "@/shared/i18n";
-import { useFinance } from "../_providers/finance-provider";
 import {
   createExpenseAction,
   deleteExpenseAction,
@@ -23,15 +23,16 @@ interface ExpensesRouteClientProps {
   initialPage: ExpensePage;
   initialCategory: string;
   initialOrder: ExpenseSortOrder;
+  cards: Card[];
 }
 
 export default function ExpensesRouteClient({
   initialPage,
   initialCategory,
   initialOrder,
+  cards,
 }: ExpensesRouteClientProps) {
   const router = useRouter();
-  const { cards } = useFinance();
   const { t } = useLocale();
   const [expensePage, setExpensePage] = useState(initialPage);
   const [editingId, setEditingId] = useState<string | null>(null);

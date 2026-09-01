@@ -52,6 +52,9 @@ export async function openApp(page: Page) {
   if (!databaseUrl) throw new Error("DATABASE_URL is required for authenticated E2E tests.");
   const sql = postgres(databaseUrl, { max: 1 });
   await sql`delete from expenses where user_id = (select id from users where email = ${email})`;
+  await sql`delete from installment_plans where user_id = (select id from users where email = ${email})`;
+  await sql`delete from cards where user_id = (select id from users where email = ${email})`;
+  await sql`delete from accounts where user_id = (select id from users where email = ${email})`;
   await sql.end();
 
   await signInExistingAccount(page);
@@ -61,10 +64,19 @@ export async function openApp(page: Page) {
 
 export async function signInExistingAccount(page: Page) {
   const email = await ensureWorkerAccount(page);
-
-  const signInResponse = await page.request.post("/api/auth/sign-in/email", {
-    data: { email, password: testPassword },
-  });
+  let signInResponse: Awaited<ReturnType<typeof page.request.post>> | undefined;
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
+    try {
+      signInResponse = await page.request.post("/api/auth/sign-in/email", {
+        data: { email, password: testPassword },
+      });
+      break;
+    } catch (error) {
+      if (attempt === 3) throw error;
+      await new Promise((resolve) => setTimeout(resolve, attempt * 100));
+    }
+  }
+  if (!signInResponse) throw new Error("E2E sign-in did not return a response.");
   if (!signInResponse.ok()) {
     throw new Error(
       `E2E sign-in failed (${signInResponse.status()}): ${await signInResponse.text()}`,

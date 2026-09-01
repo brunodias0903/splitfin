@@ -25,6 +25,7 @@ export default function ExpenseForm({
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
   const [paymentType, setPaymentType] = useState<string>(PAYMENT_TYPES[0]);
+  const [cardId, setCardId] = useState("");
   const [category, setCategory] = useState<string>(CATEGORIES[0]);
   const [date, setDate] = useState(() => toManausParts(new Date()).date);
   const [time, setTime] = useState("");
@@ -37,6 +38,7 @@ export default function ExpenseForm({
       setDescription(editingExpense.description);
       setAmount(String(editingExpense.amount));
       setPaymentType(editingExpense.paymentType ?? PAYMENT_TYPES[0]);
+      setCardId(editingExpense.cardId ?? "");
       setCategory(editingExpense.category);
       setDate(editingExpense.date);
       setTime(editingExpense.time ?? "");
@@ -47,6 +49,7 @@ export default function ExpenseForm({
     setDescription("");
     setAmount("");
     setPaymentType(PAYMENT_TYPES[0]);
+    setCardId("");
     setCategory(CATEGORIES[0]);
     setDate(toManausParts(new Date()).date);
     setTime("");
@@ -61,6 +64,7 @@ export default function ExpenseForm({
         description: description.trim(),
         amount: parseFloat(amount),
         paymentType,
+        cardId: isCardPayment && cardId ? cardId : undefined,
         category,
         date,
         time: time || undefined,
@@ -110,6 +114,7 @@ export default function ExpenseForm({
         value={paymentType}
         onChange={(e) => {
           setPaymentType(e.target.value);
+          setCardId("");
         }}
         aria-label={t.paymentType}
         className="w-full"
@@ -120,15 +125,21 @@ export default function ExpenseForm({
           </option>
         ))}
       </NativeSelect>
-      {isCardPayment && cards.length > 0 && (
+      {isCardPayment && (
         <NativeSelect
-          value=""
-          onChange={() => undefined}
+          value={cardId}
+          onChange={(event) => setCardId(event.target.value)}
           aria-label={t.cards}
           className="w-full"
-          disabled
         >
-          <option value="">{t.cardPersistencePending}</option>
+          <option value="">{t.noCard}</option>
+          {cards
+            .filter((card) => card.type === "multiple" || card.type === paymentType)
+            .map((card) => (
+              <option key={card.id} value={card.id}>
+                {card.name} ••{card.last4}
+              </option>
+            ))}
         </NativeSelect>
       )}
       <NativeSelect

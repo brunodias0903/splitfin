@@ -44,13 +44,26 @@ test.describe("experiência principal", () => {
     page,
     browser,
   }) => {
+    await navigateTo(page, "Cartões");
+    await page.getByRole("button", { name: "Adicionar Cartão", exact: true }).click();
+    await page.getByLabel("Nome do Cartão", { exact: true }).fill("Cartão da despesa");
+    await page.getByLabel("Últimos 4 dígitos", { exact: true }).fill("9876");
+    await page.getByRole("button", { name: "Adicionar Cartão", exact: true }).click();
+    await expect(page.getByText("Cartão da despesa", { exact: true })).toBeVisible();
+    await expect(page.getByLabel("Nome do Cartão", { exact: true })).not.toBeVisible();
+
     await navigateTo(page, "Despesas");
     await page.getByLabel("Descrição", { exact: true }).fill("Supermercado");
     await page.getByLabel("Valor", { exact: true }).fill("184.90");
+    await page.getByLabel("Pagamento", { exact: true }).selectOption("credit");
+    await page
+      .getByLabel("Cartões", { exact: true })
+      .selectOption({ label: "Cartão da despesa ••9876" });
     await page.getByRole("button", { name: "Adicionar Despesa", exact: true }).click();
 
     await expect(page.getByText("Supermercado", { exact: true })).toBeVisible();
     await expect(page.getByRole("listitem").getByText("R$ 184,90", { exact: true })).toBeVisible();
+    await expect(page.getByRole("listitem").getByText(/Cartão da despesa/)).toBeVisible();
     await expect(page.getByText(/1 lançamento/)).toBeVisible();
 
     const secondContext = await browser.newContext({ locale: "pt-BR" });
@@ -76,15 +89,33 @@ test.describe("experiência principal", () => {
     await expect(page.getByText("Mercado mensal", { exact: true })).not.toBeVisible();
   });
 
-  test("cadastra e exibe um cartão", async ({ page }) => {
+  test("persiste e exibe um cartão em outro navegador", async ({ page, browser }) => {
     await navigateTo(page, "Cartões");
     await page.getByRole("button", { name: "Adicionar Cartão", exact: true }).click();
     await page.getByLabel("Nome do Cartão", { exact: true }).fill("Cartão principal");
     await page.getByLabel("Últimos 4 dígitos", { exact: true }).fill("4242");
+    await page.getByLabel("Dia de fechamento", { exact: true }).fill("7");
+    await page.getByLabel("Dia de vencimento", { exact: true }).fill("14");
     await page.getByRole("button", { name: "Adicionar Cartão", exact: true }).click();
 
     await expect(page.getByText("Cartão principal", { exact: true })).toBeVisible();
+    await expect(page.getByLabel("Nome do Cartão", { exact: true })).not.toBeVisible();
     await expect(page.getByText("•••• 4242", { exact: true })).toBeVisible();
+    await expect(page.getByText("Fecha dia 7 · Vence dia 14", { exact: true })).toBeVisible();
+
+    await page.getByRole("button", { name: "Editar", exact: true }).click();
+    await page.getByLabel("Dia de vencimento", { exact: true }).fill("15");
+    await page.getByRole("button", { name: "Atualizar", exact: true }).click();
+    await expect(page.getByText("Fecha dia 7 · Vence dia 15", { exact: true })).toBeVisible();
+    await expect(page.getByLabel("Nome do Cartão", { exact: true })).not.toBeVisible();
+
+    const secondContext = await browser.newContext({ locale: "pt-BR" });
+    const secondPage = await secondContext.newPage();
+    await signInExistingAccount(secondPage);
+    await secondPage.goto("/cards");
+    await expect(secondPage.getByText("Cartão principal", { exact: true })).toBeVisible();
+    await expect(secondPage.getByText("Fecha dia 7 · Vence dia 15", { exact: true })).toBeVisible();
+    await secondContext.close();
   });
 
   test("cadastra uma parcela e mostra o progresso", async ({ page }) => {
@@ -98,6 +129,10 @@ test.describe("experiência principal", () => {
     await expect(page.getByText("Notebook", { exact: true })).toBeVisible();
     await expect(page.getByText("33%", { exact: true })).toBeVisible();
     await expect(page.getByText("2 de 6 pagas", { exact: true })).toBeVisible();
+    await page.getByRole("button", { name: "Pagar Parcela", exact: true }).click();
+    await expect(page.getByText("3 de 6 pagas", { exact: true })).toBeVisible();
+    await navigateTo(page, "Despesas");
+    await expect(page.getByText("Notebook (3/6)", { exact: true })).toBeVisible();
   });
 
   test("mantém navegação visível e não cria rolagem horizontal", async ({ page }) => {
