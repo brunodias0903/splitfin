@@ -42,7 +42,7 @@ para alternar entre macOS e WSL estão no
 ## M5 — Migração de dados e regras
 
 - [x] Migrar despesas do `localStorage` para o servidor.
-- [ ] Migrar cartões e parcelas.
+- [x] Migrar cartões e parcelas.
 - [ ] Implementar recorrência, fechamento e conciliação.
 - [ ] Oferecer importação assistida dos dados locais existentes.
 

@@ -36,6 +36,11 @@ canônicas do sistema usadas pela interface de despesas. Ela é aditiva; o
 rollback de aplicação pode manter esses valores no banco, pois o PostgreSQL não
 oferece remoção segura de um valor de enum sem reconstrução do tipo.
 
+A migration `0004` adiciona `archived_at` aos planos de parcelas. A alteração é
+aditiva e permite retirar um plano das consultas ativas sem apagar o plano nem
+as despesas já geradas. O rollback da aplicação pode manter a coluna sem
+impactar versões anteriores.
+
 ## Backup
 
 Defina `DATABASE_URL` no ambiente e crie um dump em formato customizado:

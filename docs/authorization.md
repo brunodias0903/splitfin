@@ -21,6 +21,7 @@ Os testes de integração em
 `src/shared/db/user-data-isolation.integration.test.ts` criam dois usuários e
 comprovam que nenhum deles lê, altera, exclui ou referencia agregados do outro.
 
-Esta camada ainda não substitui o `localStorage` da interface. A migração de
-cada fluxo para os repositórios ocorre nas PRs do M5, preservando a separação
-entre autorização e mudança de persistência.
+As telas de despesas, cartões e parcelas usam essa camada e não gravam mais no
+`localStorage`. Os adaptadores locais antigos permanecem temporariamente apenas
+para a importação assistida do M5.3, sem participar do fluxo normal da
+aplicação.

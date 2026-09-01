@@ -4,7 +4,7 @@ Este documento é a fonte operacional para retomar o Splitfin em outra máquina
 ou trabalhar em mais de uma frente. O [roadmap](roadmap.md) registra os marcos;
 este guia detalha ordem, dependências, entregas e critérios de aceite.
 
-> Última consolidação: 1º de setembro de 2026, durante a PR 5.1 de persistência de despesas.
+> Última consolidação: 1º de setembro de 2026, durante a PR 5.2 de persistência de cartões e parcelas.
 
 ## Estado atual
 
@@ -30,12 +30,16 @@ este guia detalha ordem, dependências, entregas e critérios de aceite.
 - despesas persistidas no PostgreSQL por Server Actions com validação no servidor;
 - listagem de despesas com filtro, ordenação, paginação e agregados calculados no banco;
 - atualização otimista com rollback e E2E cobrindo outro navegador e isolamento por usuário.
+- cartões e planos de parcelas persistidos por Server Actions autenticadas;
+- edição e arquivamento de cartões, incluindo fechamento e vencimento;
+- pagamento idempotente de parcela gerando a despesa correspondente na mesma transação;
+- associação entre despesas, cartões e parcelas ativa nas telas do servidor.
 
 ### Estado transitório conhecido
 
-- cartões e parcelas ainda são persistidos em `localStorage`;
-- despesas já usam somente o servidor, mas a associação com cartão permanece desabilitada até a PR 5.2;
-- despesas geradas pelo pagamento de parcelas serão conectadas ao servidor junto da PR 5.2;
+- os repositórios de `localStorage` permanecem somente como fonte legada para a importação assistida da PR 5.3; nenhuma tela financeira grava neles;
+- contas já possuem schema e repositório PostgreSQL isolado por usuário, mas não existia uma interface legada de contas para migrar nesta etapa;
+- cartões e planos são arquivados em vez de excluídos, preservando referências históricas;
 - não há ambiente de staging ou produção ativo;
 - Supabase e Vercel ainda aparecem como GitHub Apps da conta. O Splitfin não
   depende deles; qualquer remoção deve considerar os outros repositórios da
@@ -122,7 +126,7 @@ registrar secrets ou dados financeiros completos.
 
 #### PR 5.1 — Despesas no servidor
 
-Status: implementada na branch `feat/expense-persistence`, aguardando integração.
+Status: integrada na `main`.
 
 Branch sugerida: `feat/expense-persistence`
 
@@ -137,13 +141,15 @@ Aceite: despesas sobrevivem a outro navegador e permanecem isoladas por usuário
 
 #### PR 5.2 — Cartões e parcelas no servidor
 
+Status: implementada na branch `feat/card-installment-persistence`, aguardando integração.
+
 Branch sugerida: `feat/card-installment-persistence`
 
-- migrar cartões, contas e planos de parcelas para PostgreSQL;
-- manter despesas geradas por parcela idempotentes;
-- impedir duplicidade de número de parcela;
-- definir política para arquivamento em vez de exclusão destrutiva;
-- testar alteração de cartão, vencimento e progresso de parcelas.
+- [x] migrar cartões e planos de parcelas para PostgreSQL; contas não tinham uma interface legada;
+- [x] manter despesas geradas por parcela idempotentes;
+- [x] impedir duplicidade de número de parcela;
+- [x] definir política para arquivamento em vez de exclusão destrutiva;
+- [x] testar alteração de cartão, vencimento e progresso de parcelas.
 
 Aceite: cartões e parcelas usam apenas a persistência do servidor.
 
