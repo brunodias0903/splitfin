@@ -48,6 +48,20 @@ export async function openApp(page: Page) {
   await page.addInitScript(() => localStorage.clear());
   const email = await ensureWorkerAccount(page);
 
+  const databaseUrl = process.env.DATABASE_URL;
+  if (!databaseUrl) throw new Error("DATABASE_URL is required for authenticated E2E tests.");
+  const sql = postgres(databaseUrl, { max: 1 });
+  await sql`delete from expenses where user_id = (select id from users where email = ${email})`;
+  await sql.end();
+
+  await signInExistingAccount(page);
+  await page.goto("/");
+  await expect(page.getByRole("heading", { name: /bem-vindo|welcome back/i })).toBeVisible();
+}
+
+export async function signInExistingAccount(page: Page) {
+  const email = await ensureWorkerAccount(page);
+
   const signInResponse = await page.request.post("/api/auth/sign-in/email", {
     data: { email, password: testPassword },
   });
@@ -61,9 +75,6 @@ export async function openApp(page: Page) {
     cookie.name.endsWith("session_token"),
   );
   expect(sessionCookie).toMatchObject({ httpOnly: true, sameSite: "Lax" });
-
-  await page.goto("/");
-  await expect(page.getByRole("heading", { name: /bem-vindo|welcome back/i })).toBeVisible();
 }
 
 export async function navigateTo(page: Page, name: string) {
