@@ -41,6 +41,11 @@ aditiva e permite retirar um plano das consultas ativas sem apagar o plano nem
 as despesas já geradas. O rollback da aplicação pode manter a coluna sem
 impactar versões anteriores.
 
+A migration `0005` adiciona os lotes e itens da importação legada. A chave
+SHA-256 do lote impede a repetição do mesmo conteúdo, enquanto a combinação de
+usuário, tipo e ID de origem evita duplicações em lotes modificados. As tabelas
+são aditivas e podem permanecer no banco durante rollback da aplicação.
+
 ## Backup
 
 Defina `DATABASE_URL` no ambiente e crie um dump em formato customizado:

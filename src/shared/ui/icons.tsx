@@ -11,6 +11,7 @@ export type IconName =
   | "arrow"
   | "plus"
   | "download"
+  | "import"
   | "edit"
   | "trash"
   | "check";
@@ -59,6 +60,12 @@ const paths: Record<IconName, React.ReactNode> = {
   arrow: <path d="M5 12h14M13 6l6 6-6 6" />,
   plus: <path d="M12 5v14M5 12h14" />,
   download: <path d="M12 3v12m0 0 5-5m-5 5-5-5M5 21h14" />,
+  import: (
+    <>
+      <path d="M12 21V9m0 0 5 5m-5-5-5 5M5 3h14" />
+      <path d="M5 3v4M19 3v4" />
+    </>
+  ),
   edit: <path d="M4 20h4l11-11a2.8 2.8 0 0 0-4-4L4 16v4ZM13.5 6.5l4 4" />,
   trash: <path d="M4 7h16M9 7V4h6v3M7 7l1 14h8l1-14M10 11v6M14 11v6" />,
   check: <path d="m5 12 4 4L19 6" />,

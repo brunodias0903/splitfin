@@ -276,6 +276,51 @@ export const expenses = pgTable(
   ],
 );
 
+export const legacyImportBatches = pgTable(
+  "legacy_import_batches",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    idempotencyKey: varchar("idempotency_key", { length: 64 }).notNull(),
+    importedCards: integer("imported_cards").default(0).notNull(),
+    importedExpenses: integer("imported_expenses").default(0).notNull(),
+    importedInstallments: integer("imported_installments").default(0).notNull(),
+    skippedItems: integer("skipped_items").default(0).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex("legacy_import_batches_user_key_unique").on(table.userId, table.idempotencyKey),
+    index("legacy_import_batches_user_id_idx").on(table.userId),
+  ],
+);
+
+export const legacyImportItems = pgTable(
+  "legacy_import_items",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    batchId: uuid("batch_id")
+      .notNull()
+      .references(() => legacyImportBatches.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    sourceKind: varchar("source_kind", { length: 24 }).notNull(),
+    sourceId: text("source_id").notNull(),
+    targetId: uuid("target_id").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex("legacy_import_items_user_source_unique").on(
+      table.userId,
+      table.sourceKind,
+      table.sourceId,
+    ),
+    index("legacy_import_items_batch_id_idx").on(table.batchId),
+  ],
+);
+
 export const usersRelations = relations(users, ({ many }) => ({
   authIdentities: many(authIdentities),
   authSessions: many(authSessions),

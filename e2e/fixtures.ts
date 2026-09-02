@@ -51,6 +51,7 @@ export async function openApp(page: Page) {
   const databaseUrl = process.env.DATABASE_URL;
   if (!databaseUrl) throw new Error("DATABASE_URL is required for authenticated E2E tests.");
   const sql = postgres(databaseUrl, { max: 1 });
+  await sql`delete from legacy_import_batches where user_id = (select id from users where email = ${email})`;
   await sql`delete from expenses where user_id = (select id from users where email = ${email})`;
   await sql`delete from installment_plans where user_id = (select id from users where email = ${email})`;
   await sql`delete from cards where user_id = (select id from users where email = ${email})`;

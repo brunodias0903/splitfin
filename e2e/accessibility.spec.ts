@@ -5,7 +5,7 @@ test.describe("acessibilidade WCAG A e AA", () => {
     await openApp(page);
   });
 
-  for (const screen of ["Dashboard", "Despesas", "Parcelas", "Cartões"]) {
+  for (const screen of ["Dashboard", "Despesas", "Parcelas", "Cartões", "Importar"]) {
     test(`${screen} não possui violações automáticas`, async ({ page }, testInfo) => {
       if (screen !== "Dashboard") await navigateTo(page, screen);
       await expectNoA11yViolations(page, testInfo);

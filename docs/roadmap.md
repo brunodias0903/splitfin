@@ -44,7 +44,7 @@ para alternar entre macOS e WSL estão no
 - [x] Migrar despesas do `localStorage` para o servidor.
 - [x] Migrar cartões e parcelas.
 - [ ] Implementar recorrência, fechamento e conciliação.
-- [ ] Oferecer importação assistida dos dados locais existentes.
+- [x] Oferecer importação assistida dos dados locais existentes.
 
 ## M6 — Entrega e observabilidade
 

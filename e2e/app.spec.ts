@@ -135,10 +135,108 @@ test.describe("experiência principal", () => {
     await expect(page.getByText("Notebook (3/6)", { exact: true })).toBeVisible();
   });
 
+  test("importa, repete com segurança e remove dados locais somente após confirmação", async ({
+    page,
+  }) => {
+    await page.evaluate(() => {
+      localStorage.setItem(
+        "cards",
+        JSON.stringify([
+          {
+            id: "legacy-card-e2e",
+            name: "Cartão legado",
+            last4: "1122",
+            type: "credit",
+            closingDay: 8,
+            dueDay: 16,
+          },
+        ]),
+      );
+      localStorage.setItem(
+        "expenses",
+        JSON.stringify([
+          {
+            id: "legacy-expense-e2e",
+            description: "Despesa legada",
+            amount: 75.5,
+            category: "Food",
+            paymentType: "credit",
+            cardId: "legacy-card-e2e",
+            date: "2026-09-01",
+          },
+          { id: "legacy-invalid-e2e", description: "X" },
+        ]),
+      );
+      localStorage.setItem(
+        "fixedExpenses",
+        JSON.stringify([
+          {
+            id: "legacy-plan-e2e",
+            description: "Parcela legada",
+            totalAmount: 300,
+            totalInstallments: 3,
+            paidInstallments: 1,
+            category: "Shopping",
+            startDate: "2026-09-01",
+            active: true,
+            cardId: "legacy-card-e2e",
+          },
+        ]),
+      );
+    });
+
+    await navigateTo(page, "Importar");
+    await expect(page.getByText("1 válidos")).toHaveCount(3);
+    await expect(page.getByText("1 inválidos")).toBeVisible();
+    await expect(page.getByText(/SHA-256/)).toBeVisible();
+
+    const downloadPromise = page.waitForEvent("download");
+    await page.getByRole("button", { name: "Baixar backup" }).click();
+    const download = await downloadPromise;
+    expect(download.suggestedFilename()).toMatch(/^splitfin-local-backup-/);
+
+    await page.route("**/import", async (route) => {
+      if (route.request().method() === "POST") await route.abort();
+      else await route.continue();
+    });
+    await page.getByRole("button", { name: "Importar dados válidos" }).click();
+    await expect(
+      page.getByRole("alert").filter({ hasText: /conteúdo local foi preservado/i }),
+    ).toBeVisible();
+    expect(await page.evaluate(() => localStorage.getItem("expenses"))).not.toBeNull();
+    await page.unroute("**/import");
+
+    await page.getByRole("button", { name: "Importar dados válidos" }).click();
+    await expect(page.getByRole("heading", { name: "Importação concluída" })).toBeVisible();
+
+    await navigateTo(page, "Cartões");
+    await expect(page.getByText("Cartão legado", { exact: true })).toBeVisible();
+    await navigateTo(page, "Despesas");
+    await expect(page.getByText("Despesa legada", { exact: true })).toBeVisible();
+    await navigateTo(page, "Parcelas");
+    await expect(page.getByText("Parcela legada", { exact: true })).toBeVisible();
+
+    await navigateTo(page, "Importar");
+    await page.getByRole("button", { name: "Importar dados válidos" }).click();
+    await expect(page.getByText(/nenhum registro foi duplicado/i)).toBeVisible();
+    const clearButton = page.getByRole("button", { name: "Remover dados locais" });
+    await expect(clearButton).toBeDisabled();
+    await page.getByLabel(/Confirmo que baixei o backup/).check();
+    await clearButton.click();
+    await expect(page.getByText("Os dados legados foram removidos deste navegador.")).toBeVisible();
+    await expect
+      .poll(() =>
+        page.evaluate(() =>
+          ["cards", "expenses", "fixedExpenses"].every((key) => localStorage.getItem(key) === null),
+        ),
+      )
+      .toBe(true);
+  });
+
   test("mantém navegação visível e não cria rolagem horizontal", async ({ page }) => {
     const navigation = page.locator('nav[aria-label="Principal"]:visible');
     await expect(navigation).toBeVisible();
-    await expect(navigation.getByRole("link")).toHaveCount(4);
+    await expect(navigation.getByRole("link")).toHaveCount(5);
 
     const hasHorizontalOverflow = await page.evaluate(
       () => document.documentElement.scrollWidth > document.documentElement.clientWidth,

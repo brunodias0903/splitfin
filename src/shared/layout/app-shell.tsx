@@ -17,6 +17,7 @@ const NAV_ITEMS: { href: string; labelKey: string; icon: IconName }[] = [
   { href: "/expenses", labelKey: "navExpenses", icon: "expenses" },
   { href: "/installments", labelKey: "navInstallments", icon: "installments" },
   { href: "/cards", labelKey: "navCards", icon: "cards" },
+  { href: "/import", labelKey: "navImport", icon: "import" },
 ];
 
 export default function AppShell({ children, user }: LayoutProps) {
