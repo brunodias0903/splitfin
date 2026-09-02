@@ -36,6 +36,13 @@
       "when": 1788290608175,
       "tag": "0004_blushing_kronos",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1788319745147,
+      "tag": "0005_legacy-imports",
+      "breakpoints": true
     }
   ]
 }

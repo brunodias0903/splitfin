@@ -11,7 +11,8 @@ export type AuditAction =
   | "auth.session.revoked"
   | `finance.${"account" | "card" | "category" | "expense" | "installment"}.${
       "created" | "updated" | "deleted" | "archived"}`
-  | "finance.installment.paid";
+  | "finance.installment.paid"
+  | "finance.legacy_import.created";
 
 interface AuditEvent {
   actorUserId?: string | null;
