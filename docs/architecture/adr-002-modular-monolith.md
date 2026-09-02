@@ -56,8 +56,8 @@ substituído por operações de servidor sem alterar as regras de domínio.
 
 - existem mais arquivos e imports explícitos;
 - operações que cruzam módulos precisam ser coordenadas na raiz de composição;
-- durante a migração do M5, adaptadores locais podem permanecer apenas como
-  fonte legada de importação; o estado financeiro ativo vem do servidor.
+- após a migração do M5, o estado financeiro ativo vem do servidor; a fronteira
+  de importação lê formatos legados sem reintroduzir um repositório cliente.
 
 ## Alternativas consideradas
 

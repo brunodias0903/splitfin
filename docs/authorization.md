@@ -22,6 +22,7 @@ Os testes de integração em
 comprovam que nenhum deles lê, altera, exclui ou referencia agregados do outro.
 
 As telas de despesas, cartões e parcelas usam essa camada e não gravam mais no
-`localStorage`. Os adaptadores locais antigos permanecem temporariamente apenas
-para a importação assistida do M5.3, sem participar do fluxo normal da
-aplicação.
+`localStorage`. A importação assistida envia somente os dados encontrados no
+navegador atual para uma transação autenticada; lotes e IDs de origem são
+isolados por usuário. O conteúdo local só é removido no cliente após importação
+e confirmação explícita.

@@ -4,7 +4,7 @@ Este documento é a fonte operacional para retomar o Splitfin em outra máquina
 ou trabalhar em mais de uma frente. O [roadmap](roadmap.md) registra os marcos;
 este guia detalha ordem, dependências, entregas e critérios de aceite.
 
-> Última consolidação: 1º de setembro de 2026, durante a PR 5.2 de persistência de cartões e parcelas.
+> Última consolidação: 1º de setembro de 2026, durante a PR 5.3 de importação assistida.
 
 ## Estado atual
 
@@ -34,10 +34,11 @@ este guia detalha ordem, dependências, entregas e critérios de aceite.
 - edição e arquivamento de cartões, incluindo fechamento e vencimento;
 - pagamento idempotente de parcela gerando a despesa correspondente na mesma transação;
 - associação entre despesas, cartões e parcelas ativa nas telas do servidor.
+- importação assistida de dados legados com prévia, backup, idempotência por lote e item e limpeza confirmada;
 
 ### Estado transitório conhecido
 
-- os repositórios de `localStorage` permanecem somente como fonte legada para a importação assistida da PR 5.3; nenhuma tela financeira grava neles;
+- nenhuma tela ou repositório ativo grava no `localStorage`; a tela de importação apenas lê as três chaves legadas conhecidas até o usuário confirmar sua remoção;
 - contas já possuem schema e repositório PostgreSQL isolado por usuário, mas não existia uma interface legada de contas para migrar nesta etapa;
 - cartões e planos são arquivados em vez de excluídos, preservando referências históricas;
 - não há ambiente de staging ou produção ativo;
@@ -141,7 +142,7 @@ Aceite: despesas sobrevivem a outro navegador e permanecem isoladas por usuário
 
 #### PR 5.2 — Cartões e parcelas no servidor
 
-Status: implementada na branch `feat/card-installment-persistence`, aguardando integração.
+Status: integrada na `main` pela PR 25.
 
 Branch sugerida: `feat/card-installment-persistence`
 
@@ -155,14 +156,16 @@ Aceite: cartões e parcelas usam apenas a persistência do servidor.
 
 #### PR 5.3 — Importação assistida do navegador
 
+Status: implementada na branch `feat/local-data-import`, aguardando integração.
+
 Branch sugerida: `feat/local-data-import`
 
-- detectar dados legados no `localStorage`;
-- exibir prévia, validações e contagem antes de importar;
-- gerar uma chave de idempotência para permitir nova tentativa segura;
-- informar conflitos sem apagar o conteúdo original;
-- oferecer exportação de segurança e remoção local somente após confirmação;
-- testar importação parcial, duplicada, inválida e interrompida.
+- [x] detectar dados legados no `localStorage`;
+- [x] exibir prévia, validações e contagem antes de importar;
+- [x] gerar uma chave de idempotência para permitir nova tentativa segura;
+- [x] informar conflitos sem apagar o conteúdo original;
+- [x] oferecer exportação de segurança e remoção local somente após confirmação;
+- [x] testar importação parcial, duplicada, inválida e interrompida.
 
 Aceite: um usuário atual migra os dados sem duplicidade nem perda silenciosa.
 
