@@ -18,7 +18,6 @@ export type CardActionResult =
   { ok: true; card?: Card } | { ok: false; reason: "invalid" | "not-found" | "unexpected" };
 
 function refresh() {
-  revalidatePath("/cards");
   revalidatePath("/expenses");
   revalidatePath("/installments");
   revalidatePath("/dashboard");
